@@ -35,6 +35,37 @@
     
     
     <entry>
+      <title>IDA(with Windbg) + VMWare + winodws 内核调试环境搭建</title>
+      <link href="2021/03/30/ida_windows_vmware/"/>
+      <url>2021/03/30/ida_windows_vmware/</url>
+      
+        <content type="html"><![CDATA[<h2 id="安装镜像"><a href="#安装镜像" class="headerlink" title="安装镜像"></a>安装镜像</h2><p>直接在 <a href="https://msdn.itellyou.cn/">https://msdn.itellyou.cn/</a> 上找，建议旗舰版，旗舰版才有远程连接服务（复现 RDP 相关漏洞）。</p><p>在VMWare上安装镜像，建议不要简单安装，简单安装直接给装家庭版。</p><p>正常流程是先不安装镜像，在启动前把镜像挂载到CD/DVD，从CD/DVD启动。</p><p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1617106988/blog/Snipaste_2021-03-30_20-22-51_tlf1fm.png"></p><p>安装好后建议安装 VMTools。</p><h2 id="配置虚拟机串口"><a href="#配置虚拟机串口" class="headerlink" title="配置虚拟机串口"></a>配置虚拟机串口</h2><p>如图配置，<code>\\.\pipe\v1me_com</code>中<code>v1me_com</code>可以换成任意名字，例如<code>deadbeef_com</code>。</p><p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1617107212/blog/Snipaste_2021-03-30_20-26-42_qknrqs.png"></p><p>VMWare 中启动 Windows。管理员权限运行 cmd，执行以下命令。（注意，一般打印机占了一个串行端口，如果你的配置中有打印机，则新建的串行端口编号为2，否则为1）</p><figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bcdedit <span class="string">/debug</span> on</span><br><span class="line">bcdedit <span class="string">/dbgsettings</span> serial debugport<span class="function">:1</span> baudrate<span class="function">:115200</span>  <span class="comment"># 无打印机</span></span><br><span class="line">或</span><br><span class="line">bcdedit <span class="string">/dbgsettings</span> serial debugport<span class="function">:2</span> baudrate<span class="function">:115200</span>  <span class="comment"># 有打印机</span></span><br></pre></td></tr></table></figure><h1 id="配置IDA"><a href="#配置IDA" class="headerlink" title="配置IDA"></a>配置IDA</h1><p>选择 Debugger -&gt; Switch debugger, 选择Windbg。</p><p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1617107819/blog/Snipaste_2021-03-30_20-36-47_fnbji4.png"></p><p>选择 Debugger -&gt; Debugger options, 选择 Kernel mode debugging。</p><p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1617108045/blog/Snipaste_2021-03-30_20-40-22_odfxfr.png"></p><p>选择 Debugger -&gt; Process options。设置 Connection string 为 <code>com:pipe,port=\\.\pipe\v1me_com,reconnect</code>。（自行替换管道名字）</p><p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1617108399/blog/Snipaste_2021-03-30_20-46-33_igyupb.png"></p><p>选择 Debugger -&gt; Attach to process, 即可进入调试。</p><p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1617108539/blog/Snipaste_2021-03-30_20-48-10_lv6nxw.png"></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> CTF </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> ctf </tag>
+            
+            <tag> kernel </tag>
+            
+            <tag> pwn </tag>
+            
+            <tag> windows </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Linux kernel 双机调试</title>
       <link href="2021/03/09/Linux-kernel-vmware/"/>
       <url>2021/03/09/Linux-kernel-vmware/</url>
