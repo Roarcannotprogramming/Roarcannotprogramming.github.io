@@ -6,7 +6,7 @@
   <link href="http://blog.v1me.cn/atom.xml" rel="self"/>
   
   <link href="http://blog.v1me.cn/"/>
-  <updated>2021-04-23T11:50:51.656Z</updated>
+  <updated>2021-05-12T12:12:36.287Z</updated>
   <id>http://blog.v1me.cn/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Data riented rogram 论文阅读与个人理解</title>
+    <link href="http://blog.v1me.cn/2021/05/12/Data-Oriented-Program/"/>
+    <id>http://blog.v1me.cn/2021/05/12/Data-Oriented-Program/</id>
+    <published>2021-05-12T12:12:30.000Z</published>
+    <updated>2021-05-12T12:12:36.287Z</updated>
+    
+    
+    <summary type="html">读了一下关于 DOP 的论文，然后发现这个 DOP 和我想的 DOP 不太一样。记录一下自己的理解，有问题还请大家不吝指正。</summary>
+    
+    
+    
+    <category term="papers" scheme="http://blog.v1me.cn/categories/papers/"/>
+    
+    
+    <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
+    
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
+    
+    <category term="paper" scheme="http://blog.v1me.cn/tags/paper/"/>
+    
+  </entry>
   
   <entry>
     <title>64位 ret2dl_resolve 总结</title>
