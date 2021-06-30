@@ -6,7 +6,7 @@
   <link href="http://blog.v1me.cn/atom.xml" rel="self"/>
   
   <link href="http://blog.v1me.cn/"/>
-  <updated>2021-05-12T12:12:36.287Z</updated>
+  <updated>2021-06-30T17:47:59.074Z</updated>
   <id>http://blog.v1me.cn/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>从强网杯 Notebook 看内核条件竞争</title>
+    <link href="http://blog.v1me.cn/2021/06/30/qwb-notebook-kernel-race-condition/"/>
+    <id>http://blog.v1me.cn/2021/06/30/qwb-notebook-kernel-race-condition/</id>
+    <published>2021-06-30T17:44:38.000Z</published>
+    <updated>2021-06-30T17:47:59.074Z</updated>
+    
+    
+    <summary type="html">强网杯的时候 will 和 SYH 在做这个题，比赛结束之后 will 做出来了。will 想拉个人帮他复现一下 wp，于是我被迫接受了这个任务。只能感叹长亭的师傅太强了。</summary>
+    
+    
+    
+    <category term="CTF" scheme="http://blog.v1me.cn/categories/CTF/"/>
+    
+    
+    <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
+    
+    <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
+    
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
+    
+    <category term="linux" scheme="http://blog.v1me.cn/tags/linux/"/>
+    
+    <category term="race condition" scheme="http://blog.v1me.cn/tags/race-condition/"/>
+    
+  </entry>
   
   <entry>
     <title>Data riented rogram 论文阅读与个人理解</title>
