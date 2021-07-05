@@ -6,7 +6,7 @@
   <link href="http://blog.v1me.cn/atom.xml" rel="self"/>
   
   <link href="http://blog.v1me.cn/"/>
-  <updated>2021-06-30T18:01:28.863Z</updated>
+  <updated>2021-07-05T18:10:44.283Z</updated>
   <id>http://blog.v1me.cn/</id>
   
   <author>
@@ -17,9 +17,30 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>0CTF/TCTF 2021 Music writeup</title>
+    <link href="http://blog.v1me.cn/2021/07/06/TCTF-2021-Music-writeup/"/>
+    <id>http://blog.v1me.cn/2021/07/06/TCTF-2021-Music-writeup/</id>
+    <published>2021-07-05T18:11:44.000Z</published>
+    <updated>2021-07-05T18:10:44.283Z</updated>
+    
+    
+    <summary type="html">这次 tctf 险些白给，不过还是在最后几个小时做出了 Music 这个 0day 题 (lucky enough)。感觉出题人的意思是希望选手自己写 fuzz，但是我是人肉审的，审代码+堆风水要我老命。</summary>
+    
+    
+    
+    <category term="CTF" scheme="http://blog.v1me.cn/categories/CTF/"/>
+    
+    
+    <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
+    
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
+    
+  </entry>
+  
+  <entry>
     <title>从强网杯 Notebook 看内核条件竞争</title>
-    <link href="http://blog.v1me.cn/2021/06/30/qwb2021-notebook-kernel-race-condition.md/"/>
-    <id>http://blog.v1me.cn/2021/06/30/qwb2021-notebook-kernel-race-condition.md/</id>
+    <link href="http://blog.v1me.cn/2021/07/01/qwb2021-notebook-kernel-race-condition.md/"/>
+    <id>http://blog.v1me.cn/2021/07/01/qwb2021-notebook-kernel-race-condition.md/</id>
     <published>2021-06-30T17:44:38.000Z</published>
     <updated>2021-06-30T18:01:28.863Z</updated>
     
@@ -139,8 +160,8 @@
   
   <entry>
     <title>Linux kernel 双机调试</title>
-    <link href="http://blog.v1me.cn/2021/03/09/Linux-kernel-vmware/"/>
-    <id>http://blog.v1me.cn/2021/03/09/Linux-kernel-vmware/</id>
+    <link href="http://blog.v1me.cn/2021/03/10/Linux-kernel-vmware/"/>
+    <id>http://blog.v1me.cn/2021/03/10/Linux-kernel-vmware/</id>
     <published>2021-03-09T17:32:59.000Z</published>
     <updated>2021-03-23T14:48:10.294Z</updated>
     
@@ -227,8 +248,8 @@
   
   <entry>
     <title>GLIBC-2.29 GLIBC-2.30新增防御机制和绕过方法汇总</title>
-    <link href="http://blog.v1me.cn/2020/03/11/new-glibc-pwn/"/>
-    <id>http://blog.v1me.cn/2020/03/11/new-glibc-pwn/</id>
+    <link href="http://blog.v1me.cn/2020/03/12/new-glibc-pwn/"/>
+    <id>http://blog.v1me.cn/2020/03/12/new-glibc-pwn/</id>
     <published>2020-03-11T17:31:22.000Z</published>
     <updated>2020-03-13T18:47:20.429Z</updated>
     
@@ -295,8 +316,8 @@
   
   <entry>
     <title>SPACE-VIM 安装及配置</title>
-    <link href="http://blog.v1me.cn/2020/02/26/SPACE-VIM/"/>
-    <id>http://blog.v1me.cn/2020/02/26/SPACE-VIM/</id>
+    <link href="http://blog.v1me.cn/2020/02/27/SPACE-VIM/"/>
+    <id>http://blog.v1me.cn/2020/02/27/SPACE-VIM/</id>
     <published>2020-02-26T20:21:03.000Z</published>
     <updated>2020-02-27T12:14:21.339Z</updated>
     
@@ -318,8 +339,8 @@
   
   <entry>
     <title>树莓派安装过程</title>
-    <link href="http://blog.v1me.cn/2020/02/25/raspberrypi-installation/"/>
-    <id>http://blog.v1me.cn/2020/02/25/raspberrypi-installation/</id>
+    <link href="http://blog.v1me.cn/2020/02/26/raspberrypi-installation/"/>
+    <id>http://blog.v1me.cn/2020/02/26/raspberrypi-installation/</id>
     <published>2020-02-25T19:08:44.000Z</published>
     <updated>2020-02-25T19:11:48.815Z</updated>
     
