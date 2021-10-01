@@ -6,7 +6,7 @@
   <link href="http://blog.v1me.cn/atom.xml" rel="self"/>
   
   <link href="http://blog.v1me.cn/"/>
-  <updated>2021-07-05T18:10:44.283Z</updated>
+  <updated>2021-10-01T15:53:23.225Z</updated>
   <id>http://blog.v1me.cn/</id>
   
   <author>
@@ -17,11 +17,34 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>第五空间云安全 qemu pwn writeup</title>
+    <link href="http://blog.v1me.cn/2021/10/01/5th-space-qemu-pwn-writeup/"/>
+    <id>http://blog.v1me.cn/2021/10/01/5th-space-qemu-pwn-writeup/</id>
+    <published>2021-10-01T15:59:59.000Z</published>
+    <updated>2021-10-01T15:53:23.225Z</updated>
+    
+    
+    <summary type="html">本来没打算打第五空间的，队友说有个 qemu 题，我就想上手试试，然后没做出来。后面花了几天复现。。。结果是个套壳题，踩坑踩到自闭。。。强网杯没复现的代价，早晚得还回来。。。</summary>
+    
+    
+    
+    <category term="CTF" scheme="http://blog.v1me.cn/categories/CTF/"/>
+    
+    
+    <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
+    
+    <category term="qemu" scheme="http://blog.v1me.cn/tags/qemu/"/>
+    
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
+    
+  </entry>
+  
+  <entry>
     <title>0CTF/TCTF 2021 Music writeup</title>
     <link href="http://blog.v1me.cn/2021/07/06/TCTF-2021-Music-writeup/"/>
     <id>http://blog.v1me.cn/2021/07/06/TCTF-2021-Music-writeup/</id>
     <published>2021-07-05T18:11:44.000Z</published>
-    <updated>2021-07-05T18:10:44.283Z</updated>
+    <updated>2021-07-05T18:10:44.000Z</updated>
     
     
     <summary type="html">这次 tctf 险些白给，不过还是在最后几个小时做出了 Music 这个 0day 题 (lucky enough)。感觉出题人的意思是希望选手自己写 fuzz，但是我是人肉审的，审代码+堆风水要我老命。</summary>
@@ -54,9 +77,9 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
-    <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
-    
     <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
+    
+    <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
     
     <category term="linux" scheme="http://blog.v1me.cn/tags/linux/"/>
     
@@ -109,31 +132,6 @@
   </entry>
   
   <entry>
-    <title>CVE-2019-0708 调试记录</title>
-    <link href="http://blog.v1me.cn/2021/03/30/CVE-2019-0708/"/>
-    <id>http://blog.v1me.cn/2021/03/30/CVE-2019-0708/</id>
-    <published>2021-03-30T12:02:59.000Z</published>
-    <updated>2021-03-30T12:00:06.939Z</updated>
-    
-    
-    <summary type="html">课程作业调试 CVE-2019-0708 KeepBlue (Windows 内核 RDP 漏洞)，第一次调 Windows内核，很多表述不准见谅...</summary>
-    
-    
-    
-    <category term="CTF" scheme="http://blog.v1me.cn/categories/CTF/"/>
-    
-    
-    <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
-    
-    <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
-    
-    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
-    
-    <category term="windows" scheme="http://blog.v1me.cn/tags/windows/"/>
-    
-  </entry>
-  
-  <entry>
     <title>IDA(with Windbg) + VMWare + winodws 内核调试环境搭建</title>
     <link href="http://blog.v1me.cn/2021/03/30/ida_windows_vmware/"/>
     <id>http://blog.v1me.cn/2021/03/30/ida_windows_vmware/</id>
@@ -150,9 +148,34 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
+    
     <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
     
+    <category term="windows" scheme="http://blog.v1me.cn/tags/windows/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>CVE-2019-0708 调试记录</title>
+    <link href="http://blog.v1me.cn/2021/03/30/CVE-2019-0708/"/>
+    <id>http://blog.v1me.cn/2021/03/30/CVE-2019-0708/</id>
+    <published>2021-03-30T12:02:59.000Z</published>
+    <updated>2021-03-30T12:00:06.939Z</updated>
+    
+    
+    <summary type="html">课程作业调试 CVE-2019-0708 KeepBlue (Windows 内核 RDP 漏洞)，第一次调 Windows内核，很多表述不准见谅...</summary>
+    
+    
+    
+    <category term="CTF" scheme="http://blog.v1me.cn/categories/CTF/"/>
+    
+    
+    <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
+    
     <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
+    
+    <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
     
     <category term="windows" scheme="http://blog.v1me.cn/tags/windows/"/>
     
@@ -175,9 +198,9 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
-    <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
-    
     <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
+    
+    <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
     
   </entry>
   
@@ -219,9 +242,9 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
-    <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
-    
     <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
+    
+    <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
     
   </entry>
   
