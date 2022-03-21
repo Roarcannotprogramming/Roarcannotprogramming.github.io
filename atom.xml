@@ -6,7 +6,7 @@
   <link href="http://blog.v1me.cn/atom.xml" rel="self"/>
   
   <link href="http://blog.v1me.cn/"/>
-  <updated>2021-12-27T18:37:06.000Z</updated>
+  <updated>2021-10-01T15:53:23.000Z</updated>
   <id>http://blog.v1me.cn/</id>
   
   <author>
@@ -15,29 +15,6 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title>asisctf final 2021 rbtree writeup</title>
-    <link href="http://blog.v1me.cn/2021/12/28/asisctf-final-2021-rbtree-writeup/"/>
-    <id>http://blog.v1me.cn/2021/12/28/asisctf-final-2021-rbtree-writeup/</id>
-    <published>2021-12-27T18:38:04.656Z</published>
-    <updated>2021-12-27T18:37:06.000Z</updated>
-    
-    
-    <summary type="html">这比赛太坐牢了，简单题太简单，这内核究极折磨 qwq</summary>
-    
-    
-    
-    <category term="CTF" scheme="http://blog.v1me.cn/categories/CTF/"/>
-    
-    
-    <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
-    
-    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
-    
-    <category term="linux kernel" scheme="http://blog.v1me.cn/tags/linux-kernel/"/>
-    
-  </entry>
   
   <entry>
     <title>第五空间云安全 qemu pwn writeup</title>
@@ -56,9 +33,9 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
-    <category term="qemu" scheme="http://blog.v1me.cn/tags/qemu/"/>
-    
     <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
+    
+    <category term="qemu" scheme="http://blog.v1me.cn/tags/qemu/"/>
     
   </entry>
   
@@ -88,7 +65,7 @@
     <link href="http://blog.v1me.cn/2021/07/01/qwb2021-notebook-kernel-race-condition.md/"/>
     <id>http://blog.v1me.cn/2021/07/01/qwb2021-notebook-kernel-race-condition.md/</id>
     <published>2021-06-30T17:44:38.000Z</published>
-    <updated>2021-06-30T18:01:28.863Z</updated>
+    <updated>2021-06-30T18:01:22.000Z</updated>
     
     
     <summary type="html">强网杯的时候 will 和 SYH 在做这个题，比赛结束之后 will 做出来了。will 想拉个人帮他复现一下 wp，于是我被迫接受了这个任务。看了其他队伍的 exp 之后，只能感叹长亭的师傅太强了。</summary>
@@ -100,9 +77,9 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
-    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
-    
     <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
+    
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
     
     <category term="linux" scheme="http://blog.v1me.cn/tags/linux/"/>
     
@@ -115,7 +92,7 @@
     <link href="http://blog.v1me.cn/2021/05/12/Data-Oriented-Program/"/>
     <id>http://blog.v1me.cn/2021/05/12/Data-Oriented-Program/</id>
     <published>2021-05-12T12:12:30.000Z</published>
-    <updated>2021-05-12T12:12:36.287Z</updated>
+    <updated>2021-05-12T12:12:36.000Z</updated>
     
     
     <summary type="html">读了一下关于 DOP 的论文，然后发现这个 DOP 和我想的 DOP 不太一样。记录一下自己的理解，有问题还请大家不吝指正。</summary>
@@ -138,7 +115,7 @@
     <link href="http://blog.v1me.cn/2021/04/15/ret2dl_resolve/"/>
     <id>http://blog.v1me.cn/2021/04/15/ret2dl_resolve/</id>
     <published>2021-04-15T15:32:59.000Z</published>
-    <updated>2021-04-23T11:50:51.656Z</updated>
+    <updated>2021-04-23T11:50:51.000Z</updated>
     
     
     <summary type="html">课程实验是一个标准的 64位 ret2dl_resolve。之前调过好多次dl_resolve，但过一段时间就会忘掉，这次记录下来备忘。</summary>
@@ -159,7 +136,7 @@
     <link href="http://blog.v1me.cn/2021/03/30/CVE-2019-0708/"/>
     <id>http://blog.v1me.cn/2021/03/30/CVE-2019-0708/</id>
     <published>2021-03-30T12:02:59.000Z</published>
-    <updated>2021-03-30T12:00:06.939Z</updated>
+    <updated>2021-03-30T12:00:06.000Z</updated>
     
     
     <summary type="html">课程作业调试 CVE-2019-0708 KeepBlue (Windows 内核 RDP 漏洞)，第一次调 Windows内核，很多表述不准见谅...</summary>
@@ -171,9 +148,9 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
-    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
-    
     <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
+    
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
     
     <category term="windows" scheme="http://blog.v1me.cn/tags/windows/"/>
     
@@ -184,7 +161,7 @@
     <link href="http://blog.v1me.cn/2021/03/30/ida_windows_vmware/"/>
     <id>http://blog.v1me.cn/2021/03/30/ida_windows_vmware/</id>
     <published>2021-03-30T12:02:59.000Z</published>
-    <updated>2021-03-30T12:50:08.097Z</updated>
+    <updated>2021-03-30T12:50:08.000Z</updated>
     
     
     <summary type="html">之前弄了 Linux 的，这次调 Windows</summary>
@@ -196,9 +173,9 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
-    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
-    
     <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
+    
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
     
     <category term="windows" scheme="http://blog.v1me.cn/tags/windows/"/>
     
@@ -209,7 +186,7 @@
     <link href="http://blog.v1me.cn/2021/03/10/Linux-kernel-vmware/"/>
     <id>http://blog.v1me.cn/2021/03/10/Linux-kernel-vmware/</id>
     <published>2021-03-09T17:32:59.000Z</published>
-    <updated>2021-03-23T14:48:10.294Z</updated>
+    <updated>2021-03-23T14:48:10.000Z</updated>
     
     
     <summary type="html">qemu的网络配置太麻烦。调 CVE 还是 VMWare 舒服。</summary>
@@ -221,30 +198,9 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
-    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
-    
     <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
     
-  </entry>
-  
-  <entry>
-    <title>一个玩具算法的差分攻击</title>
-    <link href="http://blog.v1me.cn/2021/01/15/differential-attack-in-a-toy-algorithm/"/>
-    <id>http://blog.v1me.cn/2021/01/15/differential-attack-in-a-toy-algorithm/</id>
-    <published>2021-01-15T14:37:33.965Z</published>
-    <updated>2020-11-09T11:00:09.003Z</updated>
-    
-    
-    <summary type="html">密码学课的大作业，对一个玩具算法实现差分攻击</summary>
-    
-    
-    
-    <category term="密码学课程" scheme="http://blog.v1me.cn/categories/%E5%AF%86%E7%A0%81%E5%AD%A6%E8%AF%BE%E7%A8%8B/"/>
-    
-    
-    <category term="crypto" scheme="http://blog.v1me.cn/tags/crypto/"/>
-    
-    <category term="differential attack" scheme="http://blog.v1me.cn/tags/differential-attack/"/>
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
     
   </entry>
   
@@ -253,7 +209,7 @@
     <link href="http://blog.v1me.cn/2021/01/15/sendmsg_heap_spary/"/>
     <id>http://blog.v1me.cn/2021/01/15/sendmsg_heap_spary/</id>
     <published>2021-01-15T14:30:00.000Z</published>
-    <updated>2021-01-15T14:24:56.655Z</updated>
+    <updated>2021-01-15T14:24:56.000Z</updated>
     
     
     <summary type="html">初学kernel的一个 heap spary 小技巧</summary>
@@ -265,9 +221,9 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
-    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
-    
     <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
+    
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
     
   </entry>
   
@@ -276,7 +232,7 @@
     <link href="http://blog.v1me.cn/2020/05/24/linux-syscall/"/>
     <id>http://blog.v1me.cn/2020/05/24/linux-syscall/</id>
     <published>2020-05-24T08:51:50.000Z</published>
-    <updated>2020-05-24T08:54:10.220Z</updated>
+    <updated>2020-05-24T08:54:10.000Z</updated>
     
     
     <summary type="html">备忘 Linux系统调用约定</summary>
@@ -297,7 +253,7 @@
     <link href="http://blog.v1me.cn/2020/03/12/new-glibc-pwn/"/>
     <id>http://blog.v1me.cn/2020/03/12/new-glibc-pwn/</id>
     <published>2020-03-11T17:31:22.000Z</published>
-    <updated>2020-03-13T18:47:20.429Z</updated>
+    <updated>2020-03-13T18:47:20.000Z</updated>
     
     
     <summary type="html">现在新题很多用到GLIBC-2.29和GLIBC-2.30 在这里尝试做个总结</summary>
@@ -320,7 +276,7 @@
     <link href="http://blog.v1me.cn/2020/03/10/new-vm-linux-installation/"/>
     <id>http://blog.v1me.cn/2020/03/10/new-vm-linux-installation/</id>
     <published>2020-03-10T15:59:48.000Z</published>
-    <updated>2020-03-10T16:16:36.525Z</updated>
+    <updated>2020-03-10T16:16:36.000Z</updated>
     
     
     <summary type="html">&lt;p&gt;做CTF的 pwn 题很多时候本地和远程一致会方便很多&lt;/p&gt;
@@ -344,7 +300,7 @@
     <link href="http://blog.v1me.cn/2020/02/27/space-vim-config-1/"/>
     <id>http://blog.v1me.cn/2020/02/27/space-vim-config-1/</id>
     <published>2020-02-27T12:12:03.000Z</published>
-    <updated>2020-10-29T10:29:15.892Z</updated>
+    <updated>2020-10-29T10:29:15.000Z</updated>
     
     
     <summary type="html">昨天安装好了能用了 今天尝试让space-vim变得顺手</summary>
@@ -365,7 +321,7 @@
     <link href="http://blog.v1me.cn/2020/02/27/SPACE-VIM/"/>
     <id>http://blog.v1me.cn/2020/02/27/SPACE-VIM/</id>
     <published>2020-02-26T20:21:03.000Z</published>
-    <updated>2020-02-27T12:14:21.339Z</updated>
+    <updated>2020-02-27T12:14:21.000Z</updated>
     
     
     <summary type="html">受不了vim带了一大堆插件的龟速了 想起之前听到邓佬说有SPACE-VIM这个玩意 心血来潮撸来试试</summary>
@@ -388,7 +344,7 @@
     <link href="http://blog.v1me.cn/2020/02/26/raspberrypi-installation/"/>
     <id>http://blog.v1me.cn/2020/02/26/raspberrypi-installation/</id>
     <published>2020-02-25T19:08:44.000Z</published>
-    <updated>2020-02-25T19:11:48.815Z</updated>
+    <updated>2020-02-25T19:11:48.000Z</updated>
     
     
     <summary type="html">记录树莓派的一次安装</summary>
@@ -411,7 +367,7 @@
     <link href="http://blog.v1me.cn/2020/02/19/vps-install-script/"/>
     <id>http://blog.v1me.cn/2020/02/19/vps-install-script/</id>
     <published>2020-02-19T15:20:48.000Z</published>
-    <updated>2020-03-10T16:07:48.743Z</updated>
+    <updated>2020-03-10T16:07:48.000Z</updated>
     
     
     <summary type="html">&lt;p&gt;每次部署vps都要平白耗掉人生中的5个小时 为什么不自动化呢？&lt;/p&gt;
@@ -427,6 +383,73 @@
     <category term="vps" scheme="http://blog.v1me.cn/tags/vps/"/>
     
     <category term="script" scheme="http://blog.v1me.cn/tags/script/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>zer0pt ctf 2022 krce writeup</title>
+    <link href="http://blog.v1me.cn/1970/01/01/zer0pt%20ctf%202022%20krce%20writeup/"/>
+    <id>http://blog.v1me.cn/1970/01/01/zer0pt%20ctf%202022%20krce%20writeup/</id>
+    <published>1970-01-01T00:00:00.000Z</published>
+    <updated>2022-03-21T14:38:35.285Z</updated>
+    
+    
+    <summary type="html">第一次遇见限制用户态执行自由的内核题。ThinerDAS, will 和我一起拿到了这道题的一血。</summary>
+    
+    
+    
+    <category term="CTF" scheme="http://blog.v1me.cn/categories/CTF/"/>
+    
+    
+    <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
+    
+    <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
+    
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>一个玩具算法的差分攻击</title>
+    <link href="http://blog.v1me.cn/1970/01/01/differential-attack-in-a-toy-algorithm/"/>
+    <id>http://blog.v1me.cn/1970/01/01/differential-attack-in-a-toy-algorithm/</id>
+    <published>1970-01-01T00:00:00.000Z</published>
+    <updated>2020-11-09T11:00:09.000Z</updated>
+    
+    
+    <summary type="html">密码学课的大作业，对一个玩具算法实现差分攻击</summary>
+    
+    
+    
+    <category term="密码学课程" scheme="http://blog.v1me.cn/categories/%E5%AF%86%E7%A0%81%E5%AD%A6%E8%AF%BE%E7%A8%8B/"/>
+    
+    
+    <category term="crypto" scheme="http://blog.v1me.cn/tags/crypto/"/>
+    
+    <category term="differential attack" scheme="http://blog.v1me.cn/tags/differential-attack/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>asisctf final 2021 rbtree writeup</title>
+    <link href="http://blog.v1me.cn/1970/01/01/asisctf-final-2021-rbtree-writeup/"/>
+    <id>http://blog.v1me.cn/1970/01/01/asisctf-final-2021-rbtree-writeup/</id>
+    <published>1970-01-01T00:00:00.000Z</published>
+    <updated>2021-12-27T18:37:06.000Z</updated>
+    
+    
+    <summary type="html">这比赛太坐牢了，简单题太简单，这内核究极折磨 qwq</summary>
+    
+    
+    
+    <category term="CTF" scheme="http://blog.v1me.cn/categories/CTF/"/>
+    
+    
+    <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
+    
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
+    
+    <category term="linux kernel" scheme="http://blog.v1me.cn/tags/linux-kernel/"/>
     
   </entry>
   
