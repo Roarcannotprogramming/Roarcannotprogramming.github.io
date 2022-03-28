@@ -33,9 +33,9 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
-    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
-    
     <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
+    
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
     
   </entry>
   
@@ -79,9 +79,9 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
-    <category term="qemu" scheme="http://blog.v1me.cn/tags/qemu/"/>
-    
     <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
+    
+    <category term="qemu" scheme="http://blog.v1me.cn/tags/qemu/"/>
     
   </entry>
   
@@ -123,9 +123,9 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
-    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
-    
     <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
+    
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
     
     <category term="linux" scheme="http://blog.v1me.cn/tags/linux/"/>
     
@@ -194,9 +194,9 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
-    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
-    
     <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
+    
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
     
     <category term="windows" scheme="http://blog.v1me.cn/tags/windows/"/>
     
@@ -219,9 +219,9 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
-    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
-    
     <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
+    
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
     
     <category term="windows" scheme="http://blog.v1me.cn/tags/windows/"/>
     
@@ -244,9 +244,9 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
-    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
-    
     <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
+    
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
     
   </entry>
   
@@ -267,9 +267,9 @@
     
     <category term="ctf" scheme="http://blog.v1me.cn/tags/ctf/"/>
     
-    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
-    
     <category term="kernel" scheme="http://blog.v1me.cn/tags/kernel/"/>
+    
+    <category term="pwn" scheme="http://blog.v1me.cn/tags/pwn/"/>
     
   </entry>
   
@@ -299,7 +299,7 @@
     <link href="http://blog.v1me.cn/2020/05/24/linux-syscall/"/>
     <id>http://blog.v1me.cn/2020/05/24/linux-syscall/</id>
     <published>2020-05-24T08:51:50.000Z</published>
-    <updated>2020-05-24T08:54:10.000Z</updated>
+    <updated>2022-03-28T07:09:33.097Z</updated>
     
     
     <summary type="html">备忘 Linux系统调用约定</summary>
