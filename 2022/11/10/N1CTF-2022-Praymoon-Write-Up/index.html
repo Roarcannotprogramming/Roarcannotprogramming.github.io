@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/logo_180_180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/logo_32_32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/logo_16_16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.33/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.imv1.me","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":true,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="坐牢两天。有点可惜，有点折磨。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="N1CTF 2022 Praymoon Write Up">
+<meta property="og:url" content="http://blog.imv1.me/2022/11/10/N1CTF-2022-Praymoon-Write-Up/">
+<meta property="og:site_name" content="V1me&#39;s Blog">
+<meta property="og:description" content="坐牢两天。有点可惜，有点折磨。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1667985854/blog/image-20221109172258520_q462rx.png">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1668073242/blog/%E6%9C%AA%E5%91%BD%E5%90%8D%E7%99%BD%E6%9D%BF_1_qtv7gw.png">
+<meta property="article:published_time" content="2022-11-09T16:25:50.000Z">
+<meta property="article:modified_time" content="2024-02-28T06:02:00.000Z">
+<meta property="article:author" content="V1me">
+<meta property="article:tag" content="ctf">
+<meta property="article:tag" content="pwn">
+<meta property="article:tag" content="linux kernel">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1667985854/blog/image-20221109172258520_q462rx.png">
+
+
+<link rel="canonical" href="http://blog.imv1.me/2022/11/10/N1CTF-2022-Praymoon-Write-Up/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.imv1.me/2022/11/10/N1CTF-2022-Praymoon-Write-Up/","path":"2022/11/10/N1CTF-2022-Praymoon-Write-Up/","title":"N1CTF 2022 Praymoon Write Up"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>N1CTF 2022 Praymoon Write Up | V1me's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">V1me's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Talk is cheap, better to sleep.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x00-%E6%BC%8F%E6%B4%9E"><span class="nav-number">1.</span> <span class="nav-text">0x00 漏洞</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#praymoon-ko"><span class="nav-number">1.1.</span> <span class="nav-text">praymoon.ko</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#init"><span class="nav-number">1.2.</span> <span class="nav-text">init</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#config"><span class="nav-number">1.3.</span> <span class="nav-text">config</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-%E6%80%9D%E8%B7%AF"><span class="nav-number">2.</span> <span class="nav-text">0x01 思路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-%E5%88%A9%E7%94%A8"><span class="nav-number">3.</span> <span class="nav-text">0x02 利用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A3%8E%E6%B0%B4-%E6%B3%84%E9%9C%B2"><span class="nav-number">3.1.</span> <span class="nav-text">风水 &amp;&amp; 泄露</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%BB%E6%84%8F%E5%9C%B0%E5%9D%80%E9%87%8A%E6%94%BE"><span class="nav-number">3.2.</span> <span class="nav-text">任意地址释放</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ROP"><span class="nav-number">3.3.</span> <span class="nav-text">ROP</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x03-%E5%90%90%E6%A7%BD"><span class="nav-number">4.</span> <span class="nav-text">0x03 吐槽</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x04-FINAL-EXP"><span class="nav-number">5.</span> <span class="nav-text">0x04 FINAL EXP</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="V1me"
+      src="/images/logo_ai_brown.png">
+  <p class="site-author-name" itemprop="name">V1me</p>
+  <div class="site-description" itemprop="description">Work in the dark to serve the light. Nothing is true, everything is permitted.</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Roarcannotprogramming" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Roarcannotprogramming" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:z1991998920@gmail.com" title="E-Mail → mailto:z1991998920@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/RoarCantProgram" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;RoarCantProgram" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.ertuil.top/" title="https:&#x2F;&#x2F;blog.ertuil.top" rel="noopener" target="_blank">Ertuilの博客</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.wh98.me/" title="https:&#x2F;&#x2F;blog.wh98.me" rel="noopener" target="_blank">Hustcw's Blog</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://sqrt-1.me/" title="https:&#x2F;&#x2F;sqrt-1.me" rel="noopener" target="_blank">负一の平方根的博客</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://sirius1242.github.io/" title="https:&#x2F;&#x2F;sirius1242.github.io" rel="noopener" target="_blank">Sirius's Home</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.volltin.com/" title="https:&#x2F;&#x2F;blog.volltin.com" rel="noopener" target="_blank">Volltin's Blog</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.taoky.moe/" title="https:&#x2F;&#x2F;blog.taoky.moe" rel="noopener" target="_blank">Taoky's Blog</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://ibugone.com/" title="https:&#x2F;&#x2F;ibugone.com" rel="noopener" target="_blank">iBug's Home</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://ksqsf.moe/" title="https:&#x2F;&#x2F;ksqsf.moe" rel="noopener" target="_blank">ksqsf's Home</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="http://0xcc.me/" title="http:&#x2F;&#x2F;0xcc.me" rel="noopener" target="_blank">枸杞蒲蒻的博客</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://0x01.me/" title="https:&#x2F;&#x2F;0x01.me" rel="noopener" target="_blank">Hypercube's Home</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.imv1.me/2022/11/10/N1CTF-2022-Praymoon-Write-Up/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/logo_ai_brown.png">
+      <meta itemprop="name" content="V1me">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="V1me's Blog">
+      <meta itemprop="description" content="Work in the dark to serve the light. Nothing is true, everything is permitted.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="N1CTF 2022 Praymoon Write Up | V1me's Blog">
+      <meta itemprop="description" content="坐牢两天。有点可惜，有点折磨。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          N1CTF 2022 Praymoon Write Up
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-11-10 00:25:50" itemprop="dateCreated datePublished" datetime="2022-11-10T00:25:50+08:00">2022-11-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-02-28 14:02:00" itemprop="dateModified" datetime="2024-02-28T14:02:00+08:00">2024-02-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/CTF/" itemprop="url" rel="index"><span itemprop="name">CTF</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">坐牢两天。有点可惜，有点折磨。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="0x00-漏洞"><a href="#0x00-漏洞" class="headerlink" title="0x00 漏洞"></a>0x00 漏洞</h2><p>&ensp;跟所有内核题目一样，题目给出了内核 <code>bzImage (5.18.10)</code>，文件系统 <code>rootfs</code>，<code>qemu</code> 启动脚本 <code>run.sh</code>。解析 <code>rootfs</code>，提取出待分析的内核模块 <code>praymoon.ko</code>，以及系统启动脚本 <code>init</code>。</p>
+<h3 id="praymoon-ko"><a href="#praymoon-ko" class="headerlink" title="praymoon.ko"></a>praymoon.ko</h3><p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1667985854/blog/image-20221109172258520_q462rx.png" alt="image-20221109172258520"></p>
+<p>&ensp;&ensp;漏洞模块功能很简单，可以通过 add 功能分配一个 0x200 大小的堆块；通过 del 功能删除这个堆块。但是 add 功能只能用一次，del 功能只能用两次。也就是说给了我们一次 0x200 的堆块的 UAF 机会。</p>
+<p>&ensp;&ensp;但是在内核利用中，0x200 的堆块没有能够方便分配而且能够泄露&#x2F;劫持控制流的。这就是这个题的主要难点所在。此外，漏洞模块提供的功能只有分配和释放，没有读写，这是这个题的第二个难点。</p>
+<h3 id="init"><a href="#init" class="headerlink" title="init"></a>init</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">mkdir</span> /tmp</span><br><span class="line">mount -t proc none /proc</span><br><span class="line">mount -t sysfs none /sys</span><br><span class="line">mount -t devtmpfs devtmpfs /dev</span><br><span class="line">mount -t tmpfs none /tmp</span><br><span class="line">mdev -s</span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;Boot took <span class="subst">$(cut -d&#x27; &#x27; -f1 /proc/uptime)</span> seconds&quot;</span></span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/vm/unprivileged_userfaultfd</span><br><span class="line"></span><br><span class="line">insmod /praymoon.ko</span><br><span class="line"><span class="built_in">chmod</span> 666 /dev/seven</span><br><span class="line"><span class="built_in">chmod</span> 740 /flag</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/kernel/kptr_restrict</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/kernel/dmesg_restrict</span><br><span class="line"><span class="built_in">chmod</span> 400 /proc/kallsyms</span><br><span class="line"></span><br><span class="line"><span class="comment"># poweroff -d 120 -f &amp;</span></span><br><span class="line">setsid /bin/cttyhack setuidgid 1000 /bin/sh</span><br><span class="line"></span><br><span class="line">umount /proc</span><br><span class="line">umount /tmp</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">poweroff -d 0  -f</span><br></pre></td></tr></table></figure>
+
+<p>&ensp;<code>init</code> 脚本也是在内核题目中比较常见的脚本。由于内核在 5.11 以后，默认不允许非特权用户使用 <code>userfaultfd</code>，本题特意将其打开了。所以我们可以用一些平时没办法使用的功能，例如 <code>sendmsg (ctl_buf)</code> 堆喷和 <code>msg_msg</code> 任意地址写之类的。</p>
+<p>&ensp;此外，还需要注意的是，<code>init</code> 脚本中没有挂载 <code>pts</code>，也就是我们没办法喷射 <code>tty</code> 结构体；同时文件系统中没有文件支持 <code>xattr</code>，所以 <code>setxattr</code> 堆喷也不能用。（这一点我不确定，但是看起来都是内存文件系统）</p>
+<h3 id="config"><a href="#config" class="headerlink" title="config"></a>config</h3><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">CONFIG_SLAB_FREELIST_RANDOM</span>=y</span><br><span class="line"><span class="attr">CONFIG_SLAB_FREELIST_HARDENED</span>=y</span><br><span class="line"><span class="attr">CONFIG_SHUFFLE_PAGE_ALLOCATOR</span>=y</span><br><span class="line"></span><br><span class="line"><span class="attr">CONFIG_STATIC_USERMODEHELPER</span>=y</span><br><span class="line"><span class="attr">CONFIG_STATIC_USERMODEHELPER_PATH</span>=<span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">CONFIG_MEMCG</span>=y</span><br><span class="line"><span class="attr">CONFIG_MEMCG_SWAP</span>=y</span><br><span class="line"><span class="attr">CONFIG_MEMCG_KMEM</span>=y</span><br><span class="line"></span><br><span class="line"><span class="attr">CONFIG_DEBUG_LIST</span>=y</span><br><span class="line"></span><br><span class="line"><span class="attr">CONFIG_HARDENED_USERCOPY</span>=y</span><br></pre></td></tr></table></figure>
+
+<p>&ensp;根据题目给出的 <code>readme</code>，内核开启了上述几项保护。简单说就是堆的初始页面和 <code>free_list</code> 都被随机化过了；禁用了 <code>modprobe_path</code> 提权；开启了 <code>MEMCG</code>，所以 <code>GFP_KERNEL</code> 和 <code>GFP_KERNEL_ACCOUNT</code> 的堆块就在两个不同的 <code>kmem_cache</code> 中了。</p>
+<h2 id="0x01-思路"><a href="#0x01-思路" class="headerlink" title="0x01 思路"></a>0x01 思路</h2><p> &ensp;&ensp;因为没有办法使用 0x200 的 slab 构造内核利用原语（任意地址写，劫持控制流），所以我们的主体思路非常明确：转移 UAF 到其他我们能够利用的大小的 slab 中。所以在老传统的内核利用中不常出现但是威力巨大的一种原语就要派上用场：任意地址释放（arbitrary free）。</p>
+<p>&ensp;如果我们能够任意释放一个堆块，并且知道目标堆块的地址，我们就可以使用可变长的 UAF 写入原语（例如 <code>msg_msg</code>，<code>sendmsg (ctl_buf)</code>，<code>setxattr</code> 等）占用这个堆块并进行写入，从而覆盖这个堆块的内容。如果这个堆块里包含虚表指针或函数指针（例如 <code>tty_struct</code>，<code>pipe_buffer</code>，<code>seq_operations</code> 等），我们就可以劫持控制流。</p>
+<p>&ensp;&ensp;但是，即使我们知道了需要利用任意地址释放原语，还有一个关键性的问题没办法解决：泄露。</p>
+<p>&ensp;在传统的老内核漏洞利用中，泄露往往是通过 UAF 读原语读到堆块内的脏数据或者通过溢出读原语读到下一个堆块内的数据。然而，在这个题目中会遇到两个问题：</p>
+<ol>
+<li>0x200 堆块中本来有的数据过于干净，没有好用的泄露。即使我们喷射一些可变长的结构体上去，也没有泄露的可能。</li>
+<li>任意地址释放所需要的泄露是目标堆块的地址（例如某个 <code>kmalloc-1024</code> 的 slab），而不是 0x200 堆块（<code>kmalloc-512</code>）的堆地址。在内核中，0x200 堆块和 0x400 的堆块的地址可能天差地别，即使泄露出 0x200 堆块的地址，也无法稳定推断出目标堆块的地址。</li>
+</ol>
+<p>&ensp;所以我们需要更强的泄露原语：页间溢出读。在今年（2022年），已经有很多广为人知的利用手段用到了页间攻击，即攻击目标不再限于同一个 slab 内或同一个页面内，而是攻击伙伴系统的分配机制（例如 <code>dirtycred</code>）。通常来讲，我们可以调节页风水，使得目标堆块在溢出堆块的下一个页，然后溢出读到目标堆块的内容。</p>
+<p>&ensp;&ensp;好了，现在这个题目的所有难点我们都找到了解决办法，剩下的就是把这些原语拼接组装起来了。</p>
+<h2 id="0x02-利用"><a href="#0x02-利用" class="headerlink" title="0x02 利用"></a>0x02 利用</h2><h3 id="风水-泄露"><a href="#风水-泄露" class="headerlink" title="风水 &amp;&amp; 泄露"></a>风水 &amp;&amp; 泄露</h3><p>&ensp;&ensp;首先我们需要构造页风水并泄露。根据 <a target="_blank" rel="noopener" href="https://www.willsroot.io/2022/08/reviving-exploits-against-cred-struct.html">FizzBuzz101</a> 的 writeup，我们构造了如下的页风水。</p>
+<p>page1 中是 0x200 的堆块。通过 <code>malloc moon</code>, <code>free moon</code>, <code>spray user_key_payload</code> 三步即可将 <code>user_key_payload</code> 喷射到 page1 中，之后再次 <code>free moon</code> 就可以产生悬浮指针。然后喷射 <code>sendmsg(ctl_buf) + userfaultfd</code> 即可修改 <code>user_key_payload</code> 的 <code>datalen</code> 字段为 <code>0xfff0</code>，从而读到离 page1 并不算太远的 page2 和 page3。</p>
+<p>page2 中是由 shm 喷射产生的 <code>vm_area_struct</code> 结构体，其中有 <code>struct list_head</code> 结构并指向自己（最好用的内核泄露堆地址结构）。因此我们读到 page2 就能泄露出堆上的地址和内核基址，通过堆上的地址结合偏移可以算出 page1, page2, page 3 中所有的地址。</p>
+<p>page3 之后是由 pipe 喷射产生的 <code>pipe_buffer</code> 结构体，16 个 <code>pipe_buffer</code> 连在一起，大小为 0x280，占据 0x400 的堆块。为了利用，我们需要让一半的 <code>pipe_buffer</code> 初始化，一半不初始化，<strong>原因在稍后解释</strong>。初始化的 <code>pipe_buffer</code> 会带有 <code>anon_pipe_buf_ops</code> 的地址，未初始化的则全为 0。</p>
+<p>构造过程不详述，方法在 FizzBzz101 的博客中已经说得很详细。但是有一点需要特别指出：<strong>page1 和 page2 的构造用的是 FizzBuzz101 的构造方式，然而 page3 并不能使用该方法构造。</strong>原因是 page3 中的 pipe_buffer 分配时带有标志 <code>GFP_KERNEL_ACCOUNT</code>，被分配在 <code>kmalloc-cg-1024</code> 中。<code>kmalloc-cg-1024</code> 无法占据由 <code>close(sockfd)</code> 释放的页。但是经过风水，发现 <code>pipe_buffer</code> 分配的位置离 page1 也不会特别远，所以经过微调之后可以保证 page1 和 page3 的间距小于 <code>0xfff0</code>。</p>
+<p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1668073242/blog/%E6%9C%AA%E5%91%BD%E5%90%8D%E7%99%BD%E6%9D%BF_1_qtv7gw.png"></p>
+<h3 id="任意地址释放"><a href="#任意地址释放" class="headerlink" title="任意地址释放"></a>任意地址释放</h3><p>&ensp;&ensp;现在到了重头戏：构造任意地址释放。这里我们使用的结构是 <code>pollfd</code>。同样地，这个知识点在 <a target="_blank" rel="noopener" href="https://syst3mfailure.io/corjail">D3V17</a> 的博客中说得也很详细，这里不过多解释。</p>
+<p>&ensp;&ensp;泄露后，目前堆的状态是 <code>sendmsg(ctl_buf)</code> 和 <code>user_key_payload</code> 同时占据 page1 中的某个堆块。此后，在 <code>userfaultfd_handler</code> 结束后，<code>ctl_buf</code> 会被释放掉。此时我们呢控制 <code>pollfd</code> 的大小占据刚刚被释放的 <code>ctl_buf</code>。同时我们释放掉 <code>user_key_payload</code>，并再次用新的 <code>sendmsg(ctl_buf)</code> 占据并修改堆块内容，此时修改的既是 <code>pollfd</code> 的 <code>next</code> 指针。</p>
+<p>&ensp;&ensp;好了，现在可以解释为什么 <code>pipe_buffer</code> 要一半初始化一半放生了。我们的目标堆块便是的 <code>pipe_buffer</code>，如果其被初始化，那么它的第一个字段肯定不是 0。这就会导致 <code>pollfd</code> 的 <code>next</code> 指针链不会在目标堆块终止，结果自然是 kernel panic。所以初始化一半的目的只是为了定位到没有初始化的那一半（因为 <code>pipe_buffer</code> 在 <code>kmalloc-cg-1024</code> 的分配是基本连续的），我们选取某一个没有初始化的 <code>pipe_buffer</code> 作为目标堆块。</p>
+<p>&ensp;&ensp;在目标堆块被释放后，我们可以初始化目标堆块（向 pipe 里面写数据）。然后通过喷射同样是 <code>GFP_KERNEL_ACCOUNT</code> 的 <code>msg_msg</code> 结构覆盖目标堆块的虚表指针劫持控制流。（PS: <code>msg_msg</code> 结构在内核版本 5.15 之后就变为了 <code>GFP_KERNEL_ACCOUNT</code> 分配，不能再用 <code>msg_msg</code> 占页 <code>GFP_KERNEL_ACCOUNT</code> 分配的堆块）</p>
+<h3 id="ROP"><a href="#ROP" class="headerlink" title="ROP"></a>ROP</h3><p>&ensp;&ensp;到了这一步就十分地简单与显然了。值得一提地是在开启 SMAP 和 SMEP 的情况下并没有很多好用的栈迁移 gadget。最后还是按照 D3V17 的思路用了一些很奇怪的 gadget。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// push rsi; jge 0x3247e8; jmp qword ptr [rsi + 0x41];</span></span><br><span class="line"><span class="type">uint64_t</span> stack_pivot_gadget_0 = kernel_base - <span class="number">0xffffffff81000000</span> + <span class="number">0xffffffff811247e6</span>;</span><br><span class="line"><span class="comment">// pop rsp; add rsp, 0x68; pop rbx; ret;</span></span><br><span class="line"><span class="type">uint64_t</span> stack_pivot_gadget_1 = kernel_base - <span class="number">0xffffffff81000000</span> + <span class="number">0xffffffff8134862c</span>;</span><br><span class="line"><span class="comment">// add rsp, 0x78; ret;</span></span><br><span class="line"><span class="type">uint64_t</span> stack_pivot_gadget_2 = kernel_base - <span class="number">0xffffffff81000000</span> + <span class="number">0xffffffff813f643e</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="0x03-吐槽"><a href="#0x03-吐槽" class="headerlink" title="0x03 吐槽"></a>0x03 吐槽</h2><p>&ensp;&ensp;这个题最后还是零解，我在洗澡的时候立马想到了现在这个思路，当时离比赛结束只剩三个小时了，想到要改近 500 行代码还是放弃了 QWQ。我们在第一天就成功泄露出地址，但是当时想用的目标堆块是 shm 产生的 file 结构体。我们在第二天也成功地释放掉了 file 结构体，可惜我忘了 file 结构体在 <code>filp</code> 这个 <code>kmem_cache</code> 中，没有任何可以控制的堆块能够覆盖到它。给大晚上还陪我一起头秃调试的 will 和 thinerdas 道歉 hhhhh。</p>
+<h2 id="0x04-FINAL-EXP"><a href="#0x04-FINAL-EXP" class="headerlink" title="0x04 FINAL EXP"></a>0x04 FINAL EXP</h2><p>exp:<br><a target="_blank" rel="noopener" href="https://gist.github.com/Roarcannotprogramming/aca9acf10aeba78f797e6e4b93fe4b4a">https://gist.github.com/Roarcannotprogramming/aca9acf10aeba78f797e6e4b93fe4b4a</a></p>
+<video width="800" controls loop>
+  <source src="https://res.cloudinary.com/v1mecn/video/upload/v1668010003/blog/video_2022-11-10_00-06-24_b8fmps.mp4" type="video/mp4">
+  <p>Your browser doesn't support HTML5 video. Here is
+     a <a target="_blank" rel="noopener" href="https://res.cloudinary.com/v1mecn/video/upload/v1668010003/blog/video_2022-11-10_00-06-24_b8fmps.mp4">link to the video</a> instead.</p>
+</video>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>V1me
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="http://blog.imv1.me/2022/11/10/N1CTF-2022-Praymoon-Write-Up/" title="N1CTF 2022 Praymoon Write Up">http://blog.imv1.me/2022/11/10/N1CTF-2022-Praymoon-Write-Up/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/RoarCantProgram">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://t.me/Y3dramJzZw">
+            <span class="icon">
+              <i class="fab fa-telegram"></i>
+            </span>
+
+            <span class="label">Telegram</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/ctf/" rel="tag"><i class="fa fa-tag"></i> ctf</a>
+              <a href="/tags/pwn/" rel="tag"><i class="fa fa-tag"></i> pwn</a>
+              <a href="/tags/linux-kernel/" rel="tag"><i class="fa fa-tag"></i> linux kernel</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/09/02/wdb-2022-xxker-writeup/" rel="prev" title="网鼎杯 2022 xxker writeup">
+                  <i class="fa fa-angle-left"></i> 网鼎杯 2022 xxker writeup
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/02/28/USMA-2.0/" rel="next" title="USMA 2.0">
+                  USMA 2.0 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">V1me</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/Roarcannotprogramming" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/next-theme-pjax/0.6.0/pjax.min.js" integrity="sha256-vxLn1tSKWD4dqbMRyv940UYw4sXgMtYcK6reefzZrao=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.33/fancybox/fancybox.umd.js" integrity="sha256-+2+qOqR8CKoHh/AsVR9k2qaDBKWjYNC2nozhYmv5j9k=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js" integrity="sha256-j+yj56cdEY2CwkVtGyz18fNybFGpMGJ8JxG3GSyO2+I=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script><script src="/js/pjax.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>

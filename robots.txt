@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /archives/
+Allow: /tags/
+Allow: /categories/
+
+
+Sitemap: https://blog.imv1.me/sitemap.xml
+Sitemap: https://blog.imv1.me/baidusitemap.xml

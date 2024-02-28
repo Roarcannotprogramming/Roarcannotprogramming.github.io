@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/logo_180_180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/logo_32_32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/logo_16_16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.33/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.imv1.me","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":true,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="记录树莓派的一次安装">
+<meta property="og:type" content="article">
+<meta property="og:title" content="树莓派安装过程">
+<meta property="og:url" content="http://blog.imv1.me/2020/02/26/raspberrypi-installation/">
+<meta property="og:site_name" content="V1me&#39;s Blog">
+<meta property="og:description" content="记录树莓派的一次安装">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1582639754/blog/%E6%A0%91%E8%8E%93%E6%B4%BE%E5%AE%98%E7%BD%91_zifv2m.png">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1582640295/blog/rufus_rvaodr.png">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1582640658/blog/D8_K_A_3M_HXH78S_7OTXXX_i5ssho.png">
+<meta property="og:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1582644174/blog/37_W_F_1WQ2696UL_BLAV_4_zdlaxu.png">
+<meta property="article:published_time" content="2020-02-25T19:08:44.000Z">
+<meta property="article:modified_time" content="2024-02-28T06:02:00.000Z">
+<meta property="article:author" content="V1me">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="Raspberry Pi">
+<meta property="article:tag" content="NAS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://res.cloudinary.com/v1mecn/image/upload/v1582639754/blog/%E6%A0%91%E8%8E%93%E6%B4%BE%E5%AE%98%E7%BD%91_zifv2m.png">
+
+
+<link rel="canonical" href="http://blog.imv1.me/2020/02/26/raspberrypi-installation/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.imv1.me/2020/02/26/raspberrypi-installation/","path":"2020/02/26/raspberrypi-installation/","title":"树莓派安装过程"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>树莓派安装过程 | V1me's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">V1me's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Talk is cheap, better to sleep.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BD%E9%95%9C%E5%83%8F"><span class="nav-number">1.</span> <span class="nav-text">下载镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E5%85%A5%E9%95%9C%E5%83%8F"><span class="nav-number">2.</span> <span class="nav-text">写入镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%90%AF-SSH"><span class="nav-number">3.</span> <span class="nav-text">开启 SSH</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%90%AF-wifi"><span class="nav-number">4.</span> <span class="nav-text">开启 wifi</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E6%A0%91%E8%8E%93%E6%B4%BE"><span class="nav-number">5.</span> <span class="nav-text">连接树莓派</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ssh%E8%BF%9E%E6%8E%A5"><span class="nav-number">5.0.1.</span> <span class="nav-text">ssh连接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9apt%E6%BA%90"><span class="nav-number">5.0.2.</span> <span class="nav-text">修改apt源</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%E8%BD%AF%E4%BB%B6"><span class="nav-number">5.0.3.</span> <span class="nav-text">更新软件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9pi%E7%94%A8%E6%88%B7%E5%92%8Croot%E7%94%A8%E6%88%B7%E7%9A%84%E9%BB%98%E8%AE%A4%E5%AF%86%E7%A0%81"><span class="nav-number">5.0.4.</span> <span class="nav-text">修改pi用户和root用户的默认密码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E9%94%AE%E5%AE%89%E8%A3%85"><span class="nav-number">5.0.5.</span> <span class="nav-text">一键安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85zsh"><span class="nav-number">5.0.6.</span> <span class="nav-text">安装zsh</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB"><span class="nav-number">5.0.7.</span> <span class="nav-text">文件共享</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%AE%89%E8%A3%85samba"><span class="nav-number">5.0.7.0.1.</span> <span class="nav-text">安装samba</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%8C%82%E8%BD%BD%E7%A1%AC%E7%9B%98"><span class="nav-number">5.0.7.0.2.</span> <span class="nav-text">挂载硬盘</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="V1me"
+      src="/images/logo_ai_brown.png">
+  <p class="site-author-name" itemprop="name">V1me</p>
+  <div class="site-description" itemprop="description">Work in the dark to serve the light. Nothing is true, everything is permitted.</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Roarcannotprogramming" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Roarcannotprogramming" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:z1991998920@gmail.com" title="E-Mail → mailto:z1991998920@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/RoarCantProgram" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;RoarCantProgram" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.ertuil.top/" title="https:&#x2F;&#x2F;blog.ertuil.top" rel="noopener" target="_blank">Ertuilの博客</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.wh98.me/" title="https:&#x2F;&#x2F;blog.wh98.me" rel="noopener" target="_blank">Hustcw's Blog</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://sqrt-1.me/" title="https:&#x2F;&#x2F;sqrt-1.me" rel="noopener" target="_blank">负一の平方根的博客</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://sirius1242.github.io/" title="https:&#x2F;&#x2F;sirius1242.github.io" rel="noopener" target="_blank">Sirius's Home</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.volltin.com/" title="https:&#x2F;&#x2F;blog.volltin.com" rel="noopener" target="_blank">Volltin's Blog</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.taoky.moe/" title="https:&#x2F;&#x2F;blog.taoky.moe" rel="noopener" target="_blank">Taoky's Blog</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://ibugone.com/" title="https:&#x2F;&#x2F;ibugone.com" rel="noopener" target="_blank">iBug's Home</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://ksqsf.moe/" title="https:&#x2F;&#x2F;ksqsf.moe" rel="noopener" target="_blank">ksqsf's Home</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="http://0xcc.me/" title="http:&#x2F;&#x2F;0xcc.me" rel="noopener" target="_blank">枸杞蒲蒻的博客</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://0x01.me/" title="https:&#x2F;&#x2F;0x01.me" rel="noopener" target="_blank">Hypercube's Home</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.imv1.me/2020/02/26/raspberrypi-installation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/logo_ai_brown.png">
+      <meta itemprop="name" content="V1me">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="V1me's Blog">
+      <meta itemprop="description" content="Work in the dark to serve the light. Nothing is true, everything is permitted.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="树莓派安装过程 | V1me's Blog">
+      <meta itemprop="description" content="记录树莓派的一次安装">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          树莓派安装过程
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-02-26 03:08:44" itemprop="dateCreated datePublished" datetime="2020-02-26T03:08:44+08:00">2020-02-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-02-28 14:02:00" itemprop="dateModified" datetime="2024-02-28T14:02:00+08:00">2024-02-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Linux%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">Linux运维</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">记录树莓派的一次安装</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="下载镜像"><a href="#下载镜像" class="headerlink" title="下载镜像"></a>下载镜像</h2><p>直接在官网下载即可 </p>
+<p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1582639754/blog/%E6%A0%91%E8%8E%93%E6%B4%BE%E5%AE%98%E7%BD%91_zifv2m.png" alt="树莓派官网"></p>
+<p>下载Raspbian: 一个基于debian的树莓派系统</p>
+<p>但是速度很慢 建议挂梯子 </p>
+<p>也支持p2p下载 </p>
+<p><a target="_blank" rel="noopener" href="https://www.raspberrypi.org/downloads/">官网地址</a></p>
+<p>验证SHA-256 (注意: 他给的是<code>.zip</code>文件的哈希值)</p>
+<p>解压 得到<code>.img</code>镜像文件</p>
+<h2 id="写入镜像"><a href="#写入镜像" class="headerlink" title="写入镜像"></a>写入镜像</h2><p>推荐使用 <a target="_blank" rel="noopener" href="https://rufus.ie/">rufus</a> 来制作安装盘</p>
+<p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1582640295/blog/rufus_rvaodr.png" alt="rufus"></p>
+<p>和制作linux系统安装盘一样 选取设备(写入镜像的盘 也就是sd卡) </p>
+<p>引导类型直接按旁边的”选择”按钮选择镜像即可</p>
+<p>后面都是默认的 点击”开始” 几十秒钟即可做好</p>
+<h2 id="开启-SSH"><a href="#开启-SSH" class="headerlink" title="开启 SSH"></a>开启 SSH</h2><p>树莓派默认不开启ssh</p>
+<p>开启只需要在<code>boot</code>下新建一个<code>ssh</code>(没有后缀名)文件即可</p>
+<p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1582640658/blog/D8_K_A_3M_HXH78S_7OTXXX_i5ssho.png" alt="boot目录"></p>
+<h2 id="开启-wifi"><a href="#开启-wifi" class="headerlink" title="开启 wifi"></a>开启 wifi</h2><p>这一步既可以在安装之前执行也可以在安装之后执行</p>
+<p>笔者选择在安装之前执行</p>
+<p>同样的 在<code>boot</code>下创建<code>wpa_supplicant.conf</code>文件(这个文件在安装的过程中会被copy到<code>/etc/wpa_supplicant/wpa_supplicant.conf</code>)</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">country</span>=CN</span><br><span class="line"><span class="attribute">ctrl_interface</span>=DIR=/var/run/wpa_supplicant <span class="attribute">GROUP</span>=netdev</span><br><span class="line"><span class="attribute">update_config</span>=1</span><br><span class="line"></span><br><span class="line">network=&#123;</span><br><span class="line">    <span class="attribute">ssid</span>=<span class="string">&quot;your-ssid&quot;</span></span><br><span class="line">    <span class="attribute">psk</span>=<span class="string">&quot;your-password&quot;</span></span><br><span class="line">    <span class="attribute">priority</span>=1</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>将wifi的ssid(wifi名称)和password替换成自己的即可</p>
+<p>这里默认认证模式是<code>WPA-PSK</code> 如果你的wifi不是<code>WPA-PSK</code>认证方式需要自己补充参数</p>
+<p>详细如下</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#ssid: wifi名</span></span><br><span class="line"><span class="comment">#psk: 密码</span></span><br><span class="line"><span class="comment">#priority:连接优先级，数字越大优先级越高（不可以是负数）</span></span><br><span class="line"><span class="comment">#scan_ssid:连接隐藏WiFi时需要指定该值为1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># No Password</span></span><br><span class="line">network=&#123;</span><br><span class="line">ssid=<span class="string">&quot;your-ssid&quot;</span></span><br><span class="line">key_mgmt=NONE</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># WEP</span></span><br><span class="line">network=&#123;</span><br><span class="line">ssid=<span class="string">&quot;your-ssid&quot;</span></span><br><span class="line">key_mgmt=NONE</span><br><span class="line">wep_key0=<span class="string">&quot;your-password&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># WPA/WPA2</span></span><br><span class="line">network=&#123;</span><br><span class="line">ssid=<span class="string">&quot;your-ssid&quot;</span></span><br><span class="line">key_mgmt=WPA-PSK</span><br><span class="line">psk=<span class="string">&quot;your-password&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>链接wifi命令: <code>sudo ifup wlan0</code></p>
+<p>断开wifi命令: <code>sudo ifdown wlan0</code></p>
+<h2 id="连接树莓派"><a href="#连接树莓派" class="headerlink" title="连接树莓派"></a>连接树莓派</h2><p>将sd卡插入树莓派</p>
+<p>开机</p>
+<h4 id="ssh连接"><a href="#ssh连接" class="headerlink" title="ssh连接"></a>ssh连接</h4><p>进入家里路由网关(TP-Link是<code>192.168.0.1</code> 不通型号路由器都会在说明书中说明)</p>
+<p>查看连接的设备可以看到有raspberrypi</p>
+<p><img data-src="https://res.cloudinary.com/v1mecn/image/upload/v1582644174/blog/37_W_F_1WQ2696UL_BLAV_4_zdlaxu.png" alt="路由网关"></p>
+<p>记住ip地址</p>
+<p>在linux shell中执行</p>
+<p><code>ssh pi@your-ip-address</code></p>
+<p>密码是<code>raspberry</code></p>
+<p>进入root用户 之后的操作均在root下进行</p>
+<p><code>sudo su -</code></p>
+<h4 id="修改apt源"><a href="#修改apt源" class="headerlink" title="修改apt源"></a>修改apt源</h4><p>这里选用清华的tuna源(我是LUG的叛徒) <a target="_blank" rel="noopener" href="https://mirror.tuna.tsinghua.edu.cn/help/raspbian/">tuna raspbian源使用帮助</a></p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 编辑 `/etc/apt/sources.list` 文件，删除原文件所有内容，用以下内容取代：</span></span><br><span class="line">deb http:<span class="regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="regexp">/raspbian/</span>raspbian/ buster main non-free contrib</span><br><span class="line">deb-src http:<span class="regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="regexp">/raspbian/</span>raspbian/ buster main non-free contrib</span><br><span class="line"></span><br><span class="line"><span class="comment"># 编辑 `/etc/apt/sources.list.d/raspi.list` 文件，删除原文件所有内容，用以下内容取代：</span></span><br><span class="line">deb http:<span class="regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="regexp">/raspberrypi/</span> buster main ui</span><br></pre></td></tr></table></figure>
+
+<p>raspberrypi原生lite系统是没有vim的，所以先用vi吧 2333</p>
+<h4 id="更新软件"><a href="#更新软件" class="headerlink" title="更新软件"></a>更新软件</h4><p><code>apt update &amp;&amp; apt upgrade -y</code></p>
+<p><code>apt install vim -y</code></p>
+<h4 id="修改pi用户和root用户的默认密码"><a href="#修改pi用户和root用户的默认密码" class="headerlink" title="修改pi用户和root用户的默认密码"></a>修改pi用户和root用户的默认密码</h4><p><code>passwd pi</code></p>
+<p><code>passwd root</code></p>
+<h4 id="一键安装"><a href="#一键安装" class="headerlink" title="一键安装"></a>一键安装</h4><p>参考我前面一篇博客</p>
+<h4 id="安装zsh"><a href="#安装zsh" class="headerlink" title="安装zsh"></a>安装zsh</h4><p>这个也写在一键脚本了</p>
+<h4 id="文件共享"><a href="#文件共享" class="headerlink" title="文件共享"></a>文件共享</h4><p>局域网文件共享 有了这个 加个硬盘 树莓派就是一个家用NAS了</p>
+<h6 id="安装samba"><a href="#安装samba" class="headerlink" title="安装samba"></a>安装<code>samba</code></h6><p><code>apt install samba samba-common-bin –y</code></p>
+<p>备份config文件</p>
+<p><code>cp /etc/samba/smb.conf /etc/samba/smb.conf.bak</code></p>
+<p>在<code>/etc/samba/smb.conf</code>尾部加入</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[<span class="built_in">public</span>]</span><br><span class="line">   <span class="keyword">comment</span> = <span class="built_in">public</span> <span class="keyword">storage</span></span><br><span class="line">   <span class="type">path</span> = /mnt/udisk</span><br><span class="line">   <span class="keyword">valid</span> users = pi</span><br><span class="line">   <span class="keyword">read</span> <span class="keyword">only</span> = <span class="keyword">no</span></span><br><span class="line">   <span class="keyword">create</span> mask = <span class="number">0777</span></span><br><span class="line">   directory mask = <span class="number">0777</span></span><br><span class="line">   guest ok = <span class="keyword">no</span></span><br><span class="line">   browseable = yes</span><br></pre></td></tr></table></figure>
+
+<h6 id="挂载硬盘"><a href="#挂载硬盘" class="headerlink" title="挂载硬盘"></a>挂载硬盘</h6><p>直接插入硬盘(USB)</p>
+<p><code>mkdir -p /home/disk</code></p>
+<p><code>mount /dev/sda1 /home/disk</code></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>V1me
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="http://blog.imv1.me/2020/02/26/raspberrypi-installation/" title="树莓派安装过程">http://blog.imv1.me/2020/02/26/raspberrypi-installation/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/RoarCantProgram">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://t.me/Y3dramJzZw">
+            <span class="icon">
+              <i class="fab fa-telegram"></i>
+            </span>
+
+            <span class="label">Telegram</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/linux/" rel="tag"><i class="fa fa-tag"></i> linux</a>
+              <a href="/tags/Raspberry-Pi/" rel="tag"><i class="fa fa-tag"></i> Raspberry Pi</a>
+              <a href="/tags/NAS/" rel="tag"><i class="fa fa-tag"></i> NAS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/02/19/vps-install-script/" rel="prev" title="VPS（国外）一键(不)部署脚本">
+                  <i class="fa fa-angle-left"></i> VPS（国外）一键(不)部署脚本
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/02/27/SPACE-VIM/" rel="next" title="SPACE-VIM 安装及配置">
+                  SPACE-VIM 安装及配置 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">V1me</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/Roarcannotprogramming" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/next-theme-pjax/0.6.0/pjax.min.js" integrity="sha256-vxLn1tSKWD4dqbMRyv940UYw4sXgMtYcK6reefzZrao=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.33/fancybox/fancybox.umd.js" integrity="sha256-+2+qOqR8CKoHh/AsVR9k2qaDBKWjYNC2nozhYmv5j9k=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js" integrity="sha256-j+yj56cdEY2CwkVtGyz18fNybFGpMGJ8JxG3GSyO2+I=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script><script src="/js/pjax.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>

